@@ -25,6 +25,31 @@ body {
   line-height: 0.95;
 }
 
+/* Skeleton shimmer — loading de cards (nunca spinner de página inteira). */
+@keyframes kaha-shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+.kaha-skeleton {
+  background: linear-gradient(
+    90deg,
+    #1a1a1f 0%,
+    #26262d 50%,
+    #1a1a1f 100%
+  );
+  background-size: 800px 100%;
+  animation: kaha-shimmer 1.4s ease-in-out infinite;
+}
+
+/* Padding de área segura (bottom nav no iOS). */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 /* Input padrão dos forms — dark, foco na marca. */
 @layer components {
   .input {

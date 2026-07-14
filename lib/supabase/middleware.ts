@@ -39,6 +39,7 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const protegida =
+    path.startsWith("/dashboard") ||
     path.startsWith("/professores") ||
     path.startsWith("/alunos") ||
     path.startsWith("/sessoes");
@@ -50,7 +51,7 @@ export async function updateSession(request: NextRequest) {
   }
   if (user && path === "/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/professores";
+    url.pathname = "/dashboard";
     return NextResponse.redirect(url);
   }
 
