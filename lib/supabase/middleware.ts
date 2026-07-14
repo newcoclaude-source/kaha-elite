@@ -39,7 +39,9 @@ export async function updateSession(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const protegida =
-    path.startsWith("/professores") || path.startsWith("/alunos");
+    path.startsWith("/professores") ||
+    path.startsWith("/alunos") ||
+    path.startsWith("/sessoes");
 
   if (!user && protegida) {
     const url = request.nextUrl.clone();

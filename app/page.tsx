@@ -42,19 +42,27 @@ export default function Home() {
         </ul>
       </section>
 
-      <div className="grid grid-cols-2 gap-3">
+      <div className="space-y-3">
         <Link
-          href="/alunos"
-          className="rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+          href="/sessoes"
+          className="block rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
         >
-          Alunos
+          Sessões da semana
         </Link>
-        <Link
-          href="/professores"
-          className="rounded-xl border border-border px-4 py-3 text-center text-sm font-semibold text-text transition-colors hover:border-muted-2"
-        >
-          Professores
-        </Link>
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            href="/alunos"
+            className="rounded-xl border border-border px-4 py-3 text-center text-sm font-semibold text-text transition-colors hover:border-muted-2"
+          >
+            Alunos
+          </Link>
+          <Link
+            href="/professores"
+            className="rounded-xl border border-border px-4 py-3 text-center text-sm font-semibold text-text transition-colors hover:border-muted-2"
+          >
+            Professores
+          </Link>
+        </div>
       </div>
     </main>
   );

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { obterAluno } from "@/lib/kaha/alunos";
-import { diasPara, formatBRL, iniciais, STATUS } from "@/lib/kaha/ui";
+import { ultimaCargaPorExercicio } from "@/lib/kaha/cargas";
+import { diasPara, formatarData, formatBRL, iniciais, STATUS } from "@/lib/kaha/ui";
 import {
   DesativarAlunoButton,
   EditarAlunoButton,
@@ -27,6 +28,7 @@ export default async function AlunoPage({
   if (!dados) notFound();
   const { aluno, ficha, exercicios } = dados;
   const st = STATUS[aluno.semaforo];
+  const ultimaCarga = await ultimaCargaPorExercicio(aluno.id);
 
   return (
     <main className="mx-auto min-h-screen max-w-md px-5 py-8">
@@ -174,17 +176,55 @@ export default async function AlunoPage({
         )}
       </section>
 
-      {/* Placeholders — serão preenchidos no B4/B6 */}
-      <section className="grid grid-cols-2 gap-3">
-        {["A semana dele", "Cargas"].map((t) => (
-          <div
-            key={t}
-            className="rounded-2xl border border-dashed border-border bg-surface/50 p-4"
-          >
-            <p className="text-sm font-medium text-muted">{t}</p>
-            <p className="mt-1 text-xs text-muted-2">em breve</p>
+      {/* Cargas — última registrada por exercício (fecha o ciclo montar→executar) */}
+      <section className="mb-6">
+        <h2 className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          Cargas
+        </h2>
+        {exercicios.length === 0 ? (
+          <p className="rounded-2xl border border-dashed border-border bg-surface/50 py-5 text-center text-sm text-muted-2">
+            Sem ficha para acompanhar cargas.
+          </p>
+        ) : (
+          <div className="rounded-2xl border border-border bg-surface p-5">
+            <ul className="divide-y divide-border">
+              {exercicios.map((e) => {
+                const u = ultimaCarga.get(e.nome.toLowerCase());
+                return (
+                  <li
+                    key={e.id}
+                    className="flex items-center justify-between gap-3 py-2.5"
+                  >
+                    <span className="min-w-0 truncate text-sm text-text">
+                      {e.nome}
+                    </span>
+                    {u && u.carga != null ? (
+                      <span className="shrink-0 text-right text-xs text-muted">
+                        <span className="font-semibold text-text">
+                          {u.carga}kg
+                        </span>
+                        {u.reps != null && ` × ${u.reps}`}
+                        <span className="ml-1 text-muted-2">
+                          · {formatarData(u.data)}
+                        </span>
+                      </span>
+                    ) : (
+                      <span className="shrink-0 text-xs text-muted-2">
+                        sem registro
+                      </span>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
           </div>
-        ))}
+        )}
+      </section>
+
+      {/* A semana dele — chega no B5/B6 */}
+      <section className="rounded-2xl border border-dashed border-border bg-surface/50 p-4">
+        <p className="text-sm font-medium text-muted">A semana dele</p>
+        <p className="mt-1 text-xs text-muted-2">em breve</p>
       </section>
     </main>
   );

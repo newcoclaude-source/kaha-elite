@@ -61,11 +61,62 @@ export const STATUS: Record<
   },
 };
 
+// Estados da sessão + cores do chip (tokens do tailwind.config).
+export type EstadoSessao =
+  | "pendente"
+  | "agendada"
+  | "confirmada"
+  | "realizada"
+  | "faltou"
+  | "cancelada";
+
+export const ESTADO_SESSAO: Record<
+  EstadoSessao,
+  { label: string; chip: string }
+> = {
+  pendente: { label: "Pendente", chip: "border-border bg-surface-2 text-muted" },
+  agendada: { label: "Agendada", chip: "border-warn/40 bg-warn/15 text-warn" },
+  confirmada: {
+    label: "Confirmada",
+    chip: "border-confirmed/40 bg-confirmed/15 text-confirmed",
+  },
+  realizada: { label: "Realizada", chip: "border-ok/40 bg-ok/15 text-ok" },
+  faltou: { label: "Faltou", chip: "border-risk/40 bg-risk/15 text-risk" },
+  cancelada: {
+    label: "Cancelada",
+    chip: "border-border bg-surface-2 text-muted-2",
+  },
+};
+
+export const NOME_DIA: Record<number, string> = {
+  0: "Domingo",
+  1: "Segunda",
+  2: "Terça",
+  3: "Quarta",
+  4: "Quinta",
+  5: "Sexta",
+  6: "Sábado",
+};
+
+// Ordem de exibição com a semana começando na segunda (Seg=0 … Dom=6).
+export function ordemDia(dia: number): number {
+  return dia === 0 ? 6 : dia - 1;
+}
+
 export function iniciais(nome: string): string {
   const partes = nome.trim().split(/\s+/).filter(Boolean);
   const a = partes[0]?.[0] ?? "";
   const b = partes.length > 1 ? partes[partes.length - 1][0] : "";
   return (a + b).toUpperCase() || "?";
+}
+
+export function formatarData(iso: string | null | undefined): string {
+  if (!iso) return "";
+  return new Date(iso).toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "short",
+    timeZone: "America/Sao_Paulo",
+  });
 }
 
 export function formatBRL(valor: number | null | undefined): string {
