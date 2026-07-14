@@ -129,7 +129,7 @@ function SidebarDesktop({
           {!colapsado && (
             <div className="min-w-0">
               <p className="truncate text-xs font-semibold text-text">Julia</p>
-              <p className="truncate text-[10px] text-muted-2">copiloto</p>
+              <p className="truncate text-[10px] text-muted-2">concierge</p>
             </div>
           )}
         </div>
