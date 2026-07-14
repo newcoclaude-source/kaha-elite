@@ -42,12 +42,20 @@ export default function Home() {
         </ul>
       </section>
 
-      <Link
-        href="/professores"
-        className="rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
-      >
-        Entrar
-      </Link>
+      <div className="grid grid-cols-2 gap-3">
+        <Link
+          href="/alunos"
+          className="rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+        >
+          Alunos
+        </Link>
+        <Link
+          href="/professores"
+          className="rounded-xl border border-border px-4 py-3 text-center text-sm font-semibold text-text transition-colors hover:border-muted-2"
+        >
+          Professores
+        </Link>
+      </div>
     </main>
   );
 }
