@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { obterAluno } from "@/lib/kaha/alunos";
+import { listarBiblioteca } from "@/lib/kaha/biblioteca";
 import { FichaEditor } from "./ficha-editor";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,10 @@ export default async function FichaPage({
 }: {
   params: { id: string };
 }) {
-  const dados = await obterAluno(params.id);
+  const [dados, biblioteca] = await Promise.all([
+    obterAluno(params.id),
+    listarBiblioteca(),
+  ]);
   if (!dados) notFound();
   const { aluno, ficha, exercicios } = dados;
 
@@ -37,7 +41,9 @@ export default async function FichaPage({
           series: e.series,
           reps_alvo: e.reps_alvo,
           carga_alvo: e.carga_alvo,
+          biblioteca_id: e.biblioteca_id,
         }))}
+        bibliotecaInicial={biblioteca}
       />
     </main>
   );

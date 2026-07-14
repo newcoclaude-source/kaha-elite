@@ -19,6 +19,7 @@ export type Exercicio = {
   series: number | null;
   reps_alvo: string | null;
   carga_alvo: string | null;
+  biblioteca_id: string | null;
 };
 
 export type ExercicioInput = {
@@ -26,6 +27,7 @@ export type ExercicioInput = {
   series?: number | null;
   reps_alvo?: string | null;
   carga_alvo?: string | null;
+  biblioteca_id?: string | null;
 };
 
 export async function obterFicha(
@@ -46,7 +48,7 @@ export async function obterFicha(
 
   const { data: ex, error: e2 } = await supabase
     .from("kaha_ficha_exercicios")
-    .select("id, nome, ordem, series, reps_alvo, carga_alvo")
+    .select("id, nome, ordem, series, reps_alvo, carga_alvo, biblioteca_id")
     .eq("ficha_id", ficha.id)
     .order("ordem", { ascending: true });
   if (e2) throw e2;
@@ -75,6 +77,7 @@ export async function salvarFicha(
           : Number(e.series),
       reps_alvo: e.reps_alvo?.trim() || null,
       carga_alvo: e.carga_alvo?.trim() || null,
+      biblioteca_id: e.biblioteca_id || null,
     }));
 
   const { data, error } = await supabase.rpc("kaha_salvar_ficha", {

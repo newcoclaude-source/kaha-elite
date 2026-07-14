@@ -10,6 +10,10 @@ import {
   type DadosAluno,
 } from "@/lib/kaha/alunos";
 import { salvarFicha, type ExercicioInput } from "@/lib/kaha/fichas";
+import {
+  criarExercicioCustom,
+  type ExercicioBiblioteca,
+} from "@/lib/kaha/biblioteca";
 
 export type ResultadoSalvarAluno =
   | { ok: true; id: string }
@@ -44,6 +48,30 @@ export async function desativarAlunoAction(
     return { ok: true };
   } catch {
     return { ok: false };
+  }
+}
+
+export type ResultadoCustom =
+  | { ok: true; exercicio: ExercicioBiblioteca }
+  | { ok: false; erro: string };
+
+export async function criarExercicioCustomAction(dados: {
+  nome: string;
+  grupo: string;
+  equipamento?: string | null;
+}): Promise<ResultadoCustom> {
+  const nome = dados.nome?.trim();
+  if (!nome) return { ok: false, erro: "Informe o nome do exercício." };
+  if (!dados.grupo) return { ok: false, erro: "Escolha o grupo muscular." };
+  try {
+    const exercicio = await criarExercicioCustom({
+      nome,
+      grupo: dados.grupo,
+      equipamento: dados.equipamento ?? null,
+    });
+    return { ok: true, exercicio };
+  } catch {
+    return { ok: false, erro: "Não foi possível criar o exercício." };
   }
 }
 

@@ -1,17 +1,20 @@
 "use client";
 
-// Editor de ficha (momento-chave). Objetivo + divisão + tabela de exercícios
-// com adicionar/remover/reordenar. Salva via Server Action (substituição
-// transacional). Inputs 16px (classe .input) para não dar zoom no iOS.
+// Editor de ficha (B3.5): exercícios vêm de um seletor sobre a biblioteca.
+// Cada linha tem nome fixo (da biblioteca) + séries/reps/carga editáveis
+// (inputs 16px). Add/remover/reordenar. Salva transacional via Server Action.
 
 import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import type { ExercicioBiblioteca } from "@/lib/kaha/biblioteca";
 import { OBJETIVOS_FICHA } from "@/lib/kaha/ui";
-import { salvarFichaAction } from "../../actions";
+import { criarExercicioCustomAction, salvarFichaAction } from "../../actions";
+import { SeletorExercicios } from "./seletor-exercicios";
 
 type Linha = {
   key: number;
   nome: string;
+  biblioteca_id: string | null;
   series: string;
   reps_alvo: string;
   carga_alvo: string;
@@ -22,6 +25,7 @@ type ExercicioInicial = {
   series: number | null;
   reps_alvo: string | null;
   carga_alvo: string | null;
+  biblioteca_id: string | null;
 };
 
 export function FichaEditor({
@@ -29,11 +33,13 @@ export function FichaEditor({
   objetivoInicial,
   divisaoInicial,
   exerciciosIniciais,
+  bibliotecaInicial,
 }: {
   alunoId: string;
   objetivoInicial: string;
   divisaoInicial: string;
   exerciciosIniciais: ExercicioInicial[];
+  bibliotecaInicial: ExercicioBiblioteca[];
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -42,32 +48,61 @@ export function FichaEditor({
 
   const [objetivo, setObjetivo] = useState(objetivoInicial);
   const [divisao, setDivisao] = useState(divisaoInicial);
-  const [linhas, setLinhas] = useState<Linha[]>(() => {
-    const base =
-      exerciciosIniciais.length > 0
-        ? exerciciosIniciais
-        : [{ nome: "", series: null, reps_alvo: "", carga_alvo: "" }];
-    return base.map((e) => ({
+  const [biblioteca, setBiblioteca] =
+    useState<ExercicioBiblioteca[]>(bibliotecaInicial);
+  const [seletorAberto, setSeletorAberto] = useState(false);
+  const [linhas, setLinhas] = useState<Linha[]>(() =>
+    exerciciosIniciais.map((e) => ({
       key: novaKey(),
-      nome: e.nome ?? "",
+      nome: e.nome,
+      biblioteca_id: e.biblioteca_id,
       series: e.series != null ? String(e.series) : "",
       reps_alvo: e.reps_alvo ?? "",
       carga_alvo: e.carga_alvo ?? "",
-    }));
-  });
+    })),
+  );
   const [erro, setErro] = useState<string | null>(null);
 
-  function atualizar(key: number, campo: keyof Omit<Linha, "key">, valor: string) {
+  function adicionar(ex: ExercicioBiblioteca) {
+    setLinhas((prev) => [
+      ...prev,
+      {
+        key: novaKey(),
+        nome: ex.nome,
+        biblioteca_id: ex.id,
+        series: "",
+        reps_alvo: "",
+        carga_alvo: "",
+      },
+    ]);
+  }
+
+  async function criarCustom(dados: {
+    nome: string;
+    grupo: string;
+    equipamento?: string | null;
+  }): Promise<{ ok: boolean; erro?: string }> {
+    const res = await criarExercicioCustomAction(dados);
+    if (!res.ok) return { ok: false, erro: res.erro };
+    // Passa a aparecer nas buscas seguintes (ordena grupo → nome).
+    setBiblioteca((prev) =>
+      [...prev, res.exercicio].sort(
+        (a, b) =>
+          a.grupo.localeCompare(b.grupo) || a.nome.localeCompare(b.nome),
+      ),
+    );
+    adicionar(res.exercicio);
+    return { ok: true };
+  }
+
+  function atualizar(
+    key: number,
+    campo: "series" | "reps_alvo" | "carga_alvo",
+    valor: string,
+  ) {
     setLinhas((prev) =>
       prev.map((l) => (l.key === key ? { ...l, [campo]: valor } : l)),
     );
-  }
-
-  function adicionar() {
-    setLinhas((prev) => [
-      ...prev,
-      { key: novaKey(), nome: "", series: "", reps_alvo: "", carga_alvo: "" },
-    ]);
   }
 
   function remover(key: number) {
@@ -92,10 +127,11 @@ export function FichaEditor({
         series: l.series.trim() === "" ? null : Number(l.series),
         reps_alvo: l.reps_alvo.trim() || null,
         carga_alvo: l.carga_alvo.trim() || null,
+        biblioteca_id: l.biblioteca_id,
       }));
 
     if (exercicios.length === 0) {
-      setErro("Adicione ao menos um exercício com nome.");
+      setErro("Adicione ao menos um exercício.");
       return;
     }
     setErro(null);
@@ -152,16 +188,27 @@ export function FichaEditor({
           Exercícios
         </span>
 
+        {linhas.length === 0 && (
+          <p className="rounded-2xl border border-dashed border-border bg-surface/50 py-6 text-center text-sm text-muted-2">
+            Toque em “Adicionar exercício” para montar o treino.
+          </p>
+        )}
+
         {linhas.map((l, i) => (
           <div
             key={l.key}
             className="space-y-3 rounded-2xl border border-border bg-surface p-4"
           >
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-muted-2">
-                #{i + 1}
-              </span>
-              <div className="flex items-center gap-1">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex min-w-0 items-center gap-2">
+                <span className="text-xs font-semibold text-muted-2">
+                  #{i + 1}
+                </span>
+                <span className="truncate text-sm font-medium text-text">
+                  {l.nome}
+                </span>
+              </div>
+              <div className="flex shrink-0 items-center gap-1">
                 <BotaoIcone onClick={() => mover(i, -1)} disabled={i === 0}>
                   ↑
                 </BotaoIcone>
@@ -177,20 +224,11 @@ export function FichaEditor({
               </div>
             </div>
 
-            <input
-              value={l.nome}
-              onChange={(e) => atualizar(l.key, "nome", e.target.value)}
-              placeholder="Nome do exercício"
-              className="input"
-            />
-
             <div className="grid grid-cols-3 gap-2">
-              <input
-                value={l.series}
-                onChange={(e) => atualizar(l.key, "series", e.target.value)}
-                inputMode="numeric"
+              <CampoNum
+                valor={l.series}
+                onChange={(v) => atualizar(l.key, "series", v)}
                 placeholder="Séries"
-                className="input"
               />
               <input
                 value={l.reps_alvo}
@@ -210,8 +248,8 @@ export function FichaEditor({
 
         <button
           type="button"
-          onClick={adicionar}
-          className="w-full rounded-xl border border-dashed border-border py-3 text-sm font-semibold text-muted transition-colors hover:border-muted-2 hover:text-text"
+          onClick={() => setSeletorAberto(true)}
+          className="w-full rounded-xl border border-dashed border-brand/50 py-3 text-sm font-semibold text-brand transition-colors hover:bg-brand/10"
         >
           + Adicionar exercício
         </button>
@@ -237,7 +275,36 @@ export function FichaEditor({
           {pending ? "Salvando…" : "Salvar ficha"}
         </button>
       </div>
+
+      {seletorAberto && (
+        <SeletorExercicios
+          biblioteca={biblioteca}
+          onEscolher={adicionar}
+          onCriarCustom={criarCustom}
+          onClose={() => setSeletorAberto(false)}
+        />
+      )}
     </div>
+  );
+}
+
+function CampoNum({
+  valor,
+  onChange,
+  placeholder,
+}: {
+  valor: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  return (
+    <input
+      value={valor}
+      onChange={(e) => onChange(e.target.value)}
+      inputMode="numeric"
+      placeholder={placeholder}
+      className="input"
+    />
   );
 }
 

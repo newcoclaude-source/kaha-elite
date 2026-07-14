@@ -11,6 +11,28 @@ export const OBJETIVOS_FICHA = [
   "Reabilitação",
 ] as const;
 
+// Grupos musculares da biblioteca (ordem dos chips de filtro).
+export const GRUPOS = [
+  "Peito",
+  "Costas",
+  "Pernas",
+  "Ombros",
+  "Bíceps",
+  "Tríceps",
+  "Abdômen",
+  "Glúteos",
+] as const;
+
+// Equipamentos (usado no mini-form de exercício custom).
+export const EQUIPAMENTOS = [
+  "Barra",
+  "Halteres",
+  "Máquina",
+  "Polia",
+  "Cabo",
+  "Peso corporal",
+] as const;
+
 // Rótulo + classes por status do semáforo (tokens do tailwind.config).
 export const STATUS: Record<
   Semaforo,
