@@ -6,6 +6,10 @@
 import { revalidatePath } from "next/cache";
 import { marcarSessao, mudarEstado } from "@/lib/kaha/sessoes";
 import { registrarCarga } from "@/lib/kaha/cargas";
+import {
+  registrarFeedbackProfessor,
+  type FeedbackProfessor,
+} from "@/lib/kaha/feedbacks";
 import type { EstadoSessao } from "@/lib/kaha/ui";
 
 export async function marcarSessaoAction(dados: {
@@ -35,6 +39,24 @@ export async function mudarEstadoAction(
     revalidatePath("/alunos");
   }
   return res;
+}
+
+// Conclui a sessão: grava o questionário do professor (se veio) e vira realizada.
+export async function concluirSessaoAction(
+  sessaoId: string,
+  feedback: FeedbackProfessor | null,
+): Promise<{ ok: boolean; erro?: string }> {
+  try {
+    if (feedback) await registrarFeedbackProfessor(sessaoId, feedback);
+    const res = await mudarEstado(sessaoId, "realizada");
+    if (!res.ok) return res;
+    revalidatePath("/sessoes");
+    revalidatePath(`/sessoes/${sessaoId}/executar`);
+    revalidatePath("/alunos");
+    return { ok: true };
+  } catch {
+    return { ok: false, erro: "Não foi possível concluir a sessão." };
+  }
 }
 
 export async function registrarCargaAction(dados: {
