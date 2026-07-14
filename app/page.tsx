@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-8 px-6 py-12">
@@ -40,9 +42,12 @@ export default function Home() {
         </ul>
       </section>
 
-      <button className="rounded-xl bg-brand px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-brand-hover">
+      <Link
+        href="/professores"
+        className="rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
+      >
         Entrar
-      </button>
+      </Link>
     </main>
   );
 }
