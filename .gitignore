@@ -1,0 +1,31 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# next.js
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# env — NUNCA versionar segredos
+.env
+.env.local
+.env*.local
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# claude code — settings locais/segredos por máquina
+.claude/settings.local.json
+
+# misc
+.DS_Store
+*.pem
+npm-debug.log*
