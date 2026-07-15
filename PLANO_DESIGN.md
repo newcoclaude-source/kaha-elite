@@ -101,6 +101,13 @@ automático, automação, CRM, disparo, bot. Julia é **a concierge do Elite**.
    `Avatar`, `EmptyState`, `Skeleton`, `Toast`, `Toggle`, `FilterChip`.
 5. Rotas: `/dashboard /agenda /alunos /professores /conversas /configuracoes`.
    Redirect de `/sessoes` para `/agenda`.
+6. **Migration de configuração (movida do D5 — CORREÇÃO 1).** As tabelas `kaha_config`,
+   `kaha_templates`, `kaha_movimentos`, `kaha_faq` entram AQUI, no D0, porque o D6
+   (fila da Julia) depende de `kaha_templates` e `kaha_movimentos` — deixá-las no D5
+   quebrava a ordem dos blocos. **Número: usar a PRÓXIMA migration livre em
+   `supabase/migrations/`, nunca hardcodar (CORREÇÃO 2).** Ver a DDL de referência no D5.
+   > Estado real: `kaha_templates` + os 6 textos já vieram na `0011`. As outras três
+   > (`kaha_config`, `kaha_movimentos`, `kaha_faq`) foram criadas na **`0013`**.
 **Aceite:** navegar as 6 abas em desktop (sidebar) e mobile (bottom nav), no visual
 claro correto, sem quebra. Telas podem estar vazias.
 
@@ -183,7 +190,12 @@ concluir → questionário → feedback gravado → sessão realizada → conta 
 
 ## D5 · Configurações + tabelas de configuração (ler `/design/Design_Configuracoes_KahaElite.html`)
 
-### Migration `0011_kaha_config.sql`
+> **CORREÇÃO 1+2:** a **migration** de configuração foi movida daqui para o **D0**
+> (o D6 depende dela). Ela **NÃO** se chama `0011_kaha_config.sql` — `0011`/`0012` já
+> existem; foi criada como a próxima livre (`0013_kaha_config.sql`). A DDL abaixo fica
+> como **referência do schema** para a TELA do D5; a criação das tabelas já aconteceu.
+
+### Migration (referência — aplicada no D0 como `0013_kaha_config.sql`)
 ```sql
 -- singleton de configuração
 create table if not exists kaha_config (
