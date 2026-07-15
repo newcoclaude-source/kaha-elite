@@ -51,7 +51,7 @@ export function SessaoItem({ sessao }: { sessao: SessaoBoard }) {
         )}
         {sessao.estado === "confirmada" && (
           <Link
-            href={`/sessoes/${sessao.id}/executar`}
+            href={`/agenda/${sessao.id}/executar`}
             className="flex-1 rounded-xl bg-brand px-4 py-2.5 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
           >
             Executar treino
@@ -59,7 +59,7 @@ export function SessaoItem({ sessao }: { sessao: SessaoBoard }) {
         )}
         {sessao.estado === "realizada" && (
           <Link
-            href={`/sessoes/${sessao.id}/executar`}
+            href={`/agenda/${sessao.id}/executar`}
             className="flex-1 rounded-xl border border-border px-4 py-2.5 text-center text-sm font-semibold text-text transition-colors hover:border-muted-2"
           >
             Ver treino

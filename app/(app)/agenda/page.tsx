@@ -62,14 +62,14 @@ export default async function SessoesPage({
           ← Kaha Elite
         </Link>
         <h1 className="title-brand mt-1 text-4xl">
-          Ses<span className="text-brand">sões</span>
+          A<span className="text-brand">genda</span>
         </h1>
       </header>
 
       {/* Seletor de semana */}
       <div className="mb-6 flex items-center justify-between rounded-xl border border-border bg-surface px-2 py-2">
         <Link
-          href={`/sessoes?semana=${anterior}`}
+          href={`/agenda?semana=${anterior}`}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:text-text"
           aria-label="Semana anterior"
         >
@@ -78,13 +78,13 @@ export default async function SessoesPage({
         <div className="text-center">
           <p className="text-sm font-semibold text-text">{rotuloSemana(semana)}</p>
           {semana !== semanaAtual && (
-            <Link href="/sessoes" className="text-[11px] text-brand hover:underline">
+            <Link href="/agenda" className="text-[11px] text-brand hover:underline">
               voltar para esta semana
             </Link>
           )}
         </div>
         <Link
-          href={`/sessoes?semana=${proxima}`}
+          href={`/agenda?semana=${proxima}`}
           className="flex h-9 w-9 items-center justify-center rounded-lg text-muted hover:text-text"
           aria-label="Próxima semana"
         >

@@ -21,7 +21,7 @@ export async function marcarSessaoAction(dados: {
 }): Promise<{ ok: boolean; erro?: string }> {
   const res = await marcarSessao(dados);
   if (res.ok) {
-    revalidatePath("/sessoes");
+    revalidatePath("/agenda");
     revalidatePath("/alunos");
   }
   return res.ok ? { ok: true } : { ok: false, erro: res.erro };
@@ -33,8 +33,8 @@ export async function mudarEstadoAction(
 ): Promise<{ ok: boolean; erro?: string }> {
   const res = await mudarEstado(sessaoId, novo);
   if (res.ok) {
-    revalidatePath("/sessoes");
-    revalidatePath(`/sessoes/${sessaoId}/executar`);
+    revalidatePath("/agenda");
+    revalidatePath(`/agenda/${sessaoId}/executar`);
     // 'realizada' muda o semáforo de uso do aluno.
     revalidatePath("/alunos");
   }
@@ -50,8 +50,8 @@ export async function concluirSessaoAction(
     if (feedback) await registrarFeedbackProfessor(sessaoId, feedback);
     const res = await mudarEstado(sessaoId, "realizada");
     if (!res.ok) return res;
-    revalidatePath("/sessoes");
-    revalidatePath(`/sessoes/${sessaoId}/executar`);
+    revalidatePath("/agenda");
+    revalidatePath(`/agenda/${sessaoId}/executar`);
     revalidatePath("/alunos");
     return { ok: true };
   } catch {

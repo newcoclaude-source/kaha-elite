@@ -165,7 +165,7 @@ export function Execucao({ execucao }: { execucao: ExecucaoSessao }) {
       const res = await concluirSessaoAction(sessaoId, feedback);
       if (res.ok) {
         toast("Sessão concluída");
-        router.push("/sessoes");
+        router.push("/agenda");
         router.refresh();
       } else {
         setErro(res.erro ?? "Não foi possível concluir.");
@@ -180,10 +180,10 @@ export function Execucao({ execucao }: { execucao: ExecucaoSessao }) {
       <header className="mb-6">
         <button
           type="button"
-          onClick={() => router.push("/sessoes")}
+          onClick={() => router.push("/agenda")}
           className="text-xs font-medium uppercase tracking-wide text-muted-2 hover:text-muted"
         >
-          ← Sessões
+          ← Agenda
         </button>
         <div className="mt-2 flex items-end justify-between gap-3">
           <div className="min-w-0">
@@ -348,7 +348,7 @@ export function Execucao({ execucao }: { execucao: ExecucaoSessao }) {
       {erro && <p className="mt-4 text-sm text-risk">{erro}</p>}
 
       {/* Concluir sessão — fixo no rodapé (respeita a sidebar no desktop) */}
-      <div className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/95 px-5 py-4 backdrop-blur lg:pl-60">
+      <div className="pb-safe fixed inset-x-0 bottom-0 z-40 border-t border-border bg-bg/95 px-5 py-4 backdrop-blur">
         <div className="mx-auto max-w-2xl">
           <button
             type="button"

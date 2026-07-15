@@ -44,10 +44,10 @@ export default function Home() {
 
       <div className="space-y-3">
         <Link
-          href="/sessoes"
+          href="/dashboard"
           className="block rounded-xl bg-brand px-4 py-3 text-center text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
         >
-          Sessões da semana
+          Entrar no painel
         </Link>
         <div className="grid grid-cols-2 gap-3">
           <Link

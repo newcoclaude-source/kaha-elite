@@ -2,15 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Dark mode only — o app nasce escuro. */
+/* Tema CLARO (redesign): fundo claro, texto tinta. */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 html,
 body {
-  background-color: #0a0a0c;
-  color: #f5f5f6;
+  background-color: #f4f4f5;
+  color: #0a0a0c;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -35,12 +35,7 @@ body {
   }
 }
 .kaha-skeleton {
-  background: linear-gradient(
-    90deg,
-    #1a1a1f 0%,
-    #26262d 50%,
-    #1a1a1f 100%
-  );
+  background: linear-gradient(90deg, #f1f1f3 0%, #e7e7ea 50%, #f1f1f3 100%);
   background-size: 800px 100%;
   animation: kaha-shimmer 1.4s ease-in-out infinite;
 }
@@ -50,20 +45,20 @@ body {
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-/* Input padrão dos forms — dark, foco na marca. */
+/* Input padrão dos forms — claro, foco na marca. 16px evita o zoom do iOS. */
 @layer components {
   .input {
     width: 100%;
     border-radius: 0.75rem;
-    border: 1px solid #26262d;
-    background-color: #1a1a1f;
+    border: 1px solid #e7e7ea;
+    background-color: #ffffff;
     padding: 0.65rem 0.85rem;
-    font-size: 16px; /* evita o zoom automático do iOS ao focar inputs */
-    color: #f5f5f6;
+    font-size: 16px;
+    color: #0a0a0c;
     outline: none;
   }
   .input::placeholder {
-    color: #5d5d66;
+    color: #a1a1aa;
   }
   .input:focus {
     border-color: #e11d2e;

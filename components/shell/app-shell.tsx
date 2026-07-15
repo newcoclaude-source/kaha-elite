@@ -1,7 +1,7 @@
 "use client";
 
-// Shell responsivo: sidebar fixa no desktop (colapsável) + bottom nav no mobile.
-// Envolve tudo no ToastProvider. Presentação apenas — não toca em dados/rotas.
+// Shell do redesign: página clara + sidebar preta flutuante (desktop) e bottom
+// nav (mobile). 6 seções. Presentação apenas — não toca em dados/rotas/lógica.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -32,31 +32,16 @@ function useAtivo() {
 }
 
 function Chrome({ children }: { children: React.ReactNode }) {
-  const [colapsado, setColapsado] = useState(false);
   const [maisAberto, setMaisAberto] = useState(false);
   const pathname = usePathname();
-
-  // Modo imersivo (tela de execução): sem bottom nav, foco total no treino.
   const imersivo = pathname.includes("/executar");
 
-  useEffect(() => {
-    setColapsado(localStorage.getItem("kaha_sidebar") === "colapsado");
-  }, []);
-
-  function toggleColapso() {
-    setColapsado((v) => {
-      const novo = !v;
-      localStorage.setItem("kaha_sidebar", novo ? "colapsado" : "aberto");
-      return novo;
-    });
-  }
-
   return (
-    <div className="min-h-screen">
-      <SidebarDesktop colapsado={colapsado} onToggle={toggleColapso} />
+    <div className="min-h-screen bg-bg">
+      {!imersivo && <SidebarDesktop />}
 
-      <div className={colapsado ? "lg:pl-[72px]" : "lg:pl-60"}>
-        <main className={`min-h-screen lg:pb-0 ${imersivo ? "" : "pb-24"}`}>
+      <div className={imersivo ? "" : "lg:pl-[260px]"}>
+        <main className={`min-h-screen ${imersivo ? "" : "pb-24 lg:pb-0"}`}>
           {children}
         </main>
       </div>
@@ -69,144 +54,97 @@ function Chrome({ children }: { children: React.ReactNode }) {
 
 // ── Desktop ───────────────────────────────────────────────────────────────────
 
-function SidebarDesktop({
-  colapsado,
-  onToggle,
-}: {
-  colapsado: boolean;
-  onToggle: () => void;
-}) {
+function SidebarDesktop() {
   const ativo = useAtivo();
-  const { toast } = useToast();
+  const grupos: ("MENU" | "GERAL")[] = ["MENU", "GERAL"];
 
   return (
-    <aside
-      className={`fixed inset-y-0 left-0 z-40 hidden flex-col border-r border-border bg-surface lg:flex ${
-        colapsado ? "w-[72px]" : "w-60"
-      }`}
-    >
-      {/* Topo: logo + colapsar */}
-      <div className="flex h-16 items-center gap-2 px-4">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-brand text-lg font-black italic text-white">
+    <aside className="fixed inset-y-3 left-3 z-40 hidden w-[236px] flex-col rounded-shell bg-ink text-white lg:flex">
+      {/* Topo: logo */}
+      <div className="flex items-center gap-2.5 px-5 pb-2 pt-5">
+        <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-red text-lg font-black italic text-white">
           K
         </span>
-        {!colapsado && (
-          <span className="title-brand flex-1 text-lg">
-            Kaha <span className="text-brand">Elite</span>
-          </span>
-        )}
-        <button
-          type="button"
-          onClick={onToggle}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-2 hover:text-text"
-          aria-label="Colapsar menu"
-        >
-          <Icon name="collapse" className="h-4 w-4" />
-        </button>
+        <span className="title-brand text-lg text-white">
+          Kaha <span className="text-red">Elite</span>
+        </span>
       </div>
 
       {/* Navegação */}
-      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-2">
-        {NAV.map((item) => (
-          <NavLink
-            key={item.key}
-            item={item}
-            ativo={ativo(item.href)}
-            colapsado={colapsado}
-            onIndisponivel={() => toast("Em breve", "info")}
-          />
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+        {grupos.map((g) => (
+          <div key={g} className="space-y-1">
+            <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-white/35">
+              {g}
+            </p>
+            {NAV.filter((n) => n.grupo === g).map((item) => (
+              <NavLink key={item.key} item={item} ativo={ativo(item.href)} />
+            ))}
+          </div>
         ))}
       </nav>
 
-      {/* Rodapé: Julia + sair */}
-      <div className="space-y-2 border-t border-border p-3">
-        <div
-          className={`flex items-center gap-2 rounded-xl border border-border bg-surface-2 px-3 py-2 ${
-            colapsado ? "justify-center" : ""
-          }`}
-        >
-          <span className="h-2 w-2 shrink-0 rounded-full bg-ok" />
-          {!colapsado && (
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-text">Julia</p>
-              <p className="truncate text-[10px] text-muted-2">concierge</p>
-            </div>
-          )}
-        </div>
-        <LogoutButton colapsado={colapsado} />
-      </div>
+      {/* Rodapé: usuário */}
+      <UserFooter />
     </aside>
   );
 }
 
-function NavLink({
-  item,
-  ativo,
-  colapsado,
-  onIndisponivel,
-}: {
-  item: NavItem;
-  ativo: boolean;
-  colapsado: boolean;
-  onIndisponivel: () => void;
-}) {
-  const cls = `flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
-    ativo
-      ? "bg-brand/15 text-brand"
-      : "text-muted hover:bg-surface-2 hover:text-text"
-  } ${colapsado ? "justify-center" : ""}`;
-
-  const conteudo = (
-    <>
-      <Icon name={item.icon} className="h-5 w-5 shrink-0" />
-      {!colapsado && <span className="flex-1">{item.label}</span>}
-      {!colapsado && !item.live && (
-        <span className="text-[9px] uppercase text-muted-2">em breve</span>
-      )}
-    </>
-  );
-
-  if (!item.live) {
-    return (
-      <button
-        type="button"
-        onClick={onIndisponivel}
-        className={`w-full ${cls} opacity-60`}
-        title={`${item.label} — em breve`}
-      >
-        {conteudo}
-      </button>
-    );
-  }
+function NavLink({ item, ativo }: { item: NavItem; ativo: boolean }) {
   return (
-    <Link href={item.href} className={cls} title={item.label}>
-      {conteudo}
+    <Link
+      href={item.href}
+      className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-colors ${
+        ativo
+          ? "bg-red text-white"
+          : "text-white/70 hover:bg-white/10 hover:text-white"
+      }`}
+    >
+      <Icon name={item.icon} className="h-5 w-5 shrink-0" />
+      <span className="flex-1">{item.label}</span>
     </Link>
   );
 }
 
-function LogoutButton({ colapsado }: { colapsado: boolean }) {
+function UserFooter() {
   const router = useRouter();
+  const [email, setEmail] = useState<string | null>(null);
   const [saindo, setSaindo] = useState(false);
+
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => setEmail(data.user?.email ?? null));
+  }, []);
+
   async function sair() {
     setSaindo(true);
     await createClient().auth.signOut();
     router.replace("/login");
     router.refresh();
   }
+
   return (
-    <button
-      type="button"
-      onClick={sair}
-      disabled={saindo}
-      className={`flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-text disabled:opacity-60 ${
-        colapsado ? "justify-center" : ""
-      }`}
-      title="Sair"
-    >
-      <Icon name="logout" className="h-5 w-5 shrink-0" />
-      {!colapsado && <span>{saindo ? "Saindo…" : "Sair"}</span>}
-    </button>
+    <div className="flex items-center gap-2.5 border-t border-white/10 px-4 py-3">
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-xs font-bold text-white">
+        {(email?.[0] ?? "K").toUpperCase()}
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-xs font-semibold text-white">
+          {email ? email.split("@")[0] : "Kaha Elite"}
+        </p>
+        <p className="truncate text-[10px] text-white/40">CT Kaha</p>
+      </div>
+      <button
+        type="button"
+        onClick={sair}
+        disabled={saindo}
+        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-white/50 hover:bg-white/10 hover:text-white disabled:opacity-50"
+        title="Sair"
+      >
+        <Icon name="logout" className="h-4 w-4" />
+      </button>
+    </div>
   );
 }
 
@@ -215,7 +153,7 @@ function LogoutButton({ colapsado }: { colapsado: boolean }) {
 function BottomNav({ onMais }: { onMais: () => void }) {
   const ativo = useAtivo();
   return (
-    <nav className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-border bg-surface/95 backdrop-blur lg:hidden">
+    <nav className="pb-safe fixed inset-x-0 bottom-0 z-40 flex border-t border-line bg-card/95 backdrop-blur lg:hidden">
       {BOTTOM_KEYS.map((k) => {
         const item = itemPorKey(k)!;
         return (
@@ -223,7 +161,7 @@ function BottomNav({ onMais }: { onMais: () => void }) {
             key={k}
             href={item.href}
             className={`flex flex-1 flex-col items-center gap-1 py-2.5 text-[10px] font-semibold ${
-              ativo(item.href) ? "text-brand" : "text-muted-2"
+              ativo(item.href) ? "text-red" : "text-muted-2"
             }`}
           >
             <Icon name={item.icon} className="h-5 w-5" />
@@ -245,7 +183,6 @@ function BottomNav({ onMais }: { onMais: () => void }) {
 
 function MaisSheet({ onClose }: { onClose: () => void }) {
   const ativo = useAtivo();
-  const { toast } = useToast();
   const router = useRouter();
 
   async function sair() {
@@ -256,50 +193,35 @@ function MaisSheet({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end bg-black/60 lg:hidden"
+      className="fixed inset-0 z-50 flex items-end bg-black/40 lg:hidden"
       onClick={onClose}
     >
       <div
-        className="pb-safe w-full rounded-t-2xl border border-border bg-surface p-4"
+        className="pb-safe w-full rounded-t-2xl border border-line bg-card p-4"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-border" />
+        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-line" />
         <div className="grid grid-cols-1 gap-1">
           {MAIS_KEYS.map((k) => {
             const item = itemPorKey(k)!;
-            const conteudo = (
-              <>
-                <Icon name={item.icon} className="h-5 w-5 shrink-0" />
-                <span className="flex-1">{item.label}</span>
-                {!item.live && (
-                  <span className="text-[9px] uppercase text-muted-2">
-                    em breve
-                  </span>
-                )}
-              </>
-            );
-            const cls = `flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold ${
-              ativo(item.href) ? "bg-brand/15 text-brand" : "text-text"
-            }`;
-            return item.live ? (
-              <Link key={k} href={item.href} onClick={onClose} className={cls}>
-                {conteudo}
-              </Link>
-            ) : (
-              <button
+            return (
+              <Link
                 key={k}
-                type="button"
-                onClick={() => toast("Em breve", "info")}
-                className={`${cls} opacity-60`}
+                href={item.href}
+                onClick={onClose}
+                className={`flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold ${
+                  ativo(item.href) ? "bg-red-soft text-red" : "text-ink"
+                }`}
               >
-                {conteudo}
-              </button>
+                <Icon name={item.icon} className="h-5 w-5 shrink-0" />
+                {item.label}
+              </Link>
             );
           })}
           <button
             type="button"
             onClick={sair}
-            className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-muted hover:text-text"
+            className="mt-1 flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-semibold text-muted hover:text-ink"
           >
             <Icon name="logout" className="h-5 w-5 shrink-0" />
             Sair

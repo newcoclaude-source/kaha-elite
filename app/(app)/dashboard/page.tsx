@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/icons";
 export const dynamic = "force-dynamic";
 
 const ATALHOS = [
-  { href: "/sessoes", icon: "sessoes" as const, label: "Sessões da semana", desc: "Marcar e executar treinos" },
+  { href: "/agenda", icon: "sessoes" as const, label: "Agenda", desc: "Marcar e executar treinos" },
   { href: "/alunos", icon: "alunos" as const, label: "Alunos", desc: "Fichas, cargas e semáforo" },
   { href: "/professores", icon: "professores" as const, label: "Professores", desc: "Grade de horários" },
 ];

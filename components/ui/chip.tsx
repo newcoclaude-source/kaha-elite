@@ -9,12 +9,12 @@ export type ChipTone =
   | "confirmed";
 
 const TONS: Record<ChipTone, string> = {
-  neutral: "border-border bg-surface-2 text-muted",
-  brand: "border-brand/40 bg-brand/15 text-brand",
-  ok: "border-ok/40 bg-ok/15 text-ok",
-  warn: "border-warn/40 bg-warn/15 text-warn",
-  risk: "border-risk/40 bg-risk/15 text-risk",
-  confirmed: "border-confirmed/40 bg-confirmed/15 text-confirmed",
+  neutral: "border-line bg-line-2 text-muted",
+  brand: "border-red/30 bg-red-soft text-red",
+  ok: "border-ok/30 bg-ok-soft text-ok",
+  warn: "border-warn/30 bg-warn-soft text-warn",
+  risk: "border-risk/30 bg-red-soft text-risk",
+  confirmed: "border-blue/30 bg-blue-soft text-blue",
 };
 
 export function Chip({
