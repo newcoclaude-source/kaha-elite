@@ -2,8 +2,10 @@
 // Consome a view kaha_alunos_semaforo (não recalcula a lógica de uso).
 
 import { createClient } from "@/lib/supabase/server";
+import { corProfessor } from "@/lib/kaha/cores";
 import { obterFicha, type Exercicio, type Ficha } from "@/lib/kaha/fichas";
-import type { Semaforo } from "@/lib/kaha/ui";
+import { semanaRef } from "@/lib/kaha/sessoes";
+import type { EstadoSessao, Semaforo } from "@/lib/kaha/ui";
 import { normalizarWhatsapp } from "@/lib/kaha/whatsapp";
 
 export type FiltroAluno = "todos" | "sem_ficha" | "risco" | "em_ritmo";
@@ -190,4 +192,130 @@ export async function desativarAluno(id: string): Promise<void> {
     .update({ ativo: false })
     .eq("id", id);
   if (error) throw error;
+}
+
+// ── D1 (Alunos redesign): lista enriquecida (tabela desktop / cards mobile) ───
+
+export type AlunoD1 = {
+  id: string;
+  nome: string;
+  telefone: string | null;
+  objetivo: string | null;
+  semaforo: Semaforo;
+  sessoes_4sem: number;
+  tem_ficha: boolean;
+  ficha_divisao: string | null;
+  ficha_ex: number;
+  dor_queixa: string | null;
+  ultimo_treino_dias: number | null; // null = nunca treinou
+  sessao_semana: {
+    estado: EstadoSessao;
+    dia_semana: number;
+    hora: string;
+    professor_nome: string;
+    cor: string;
+  } | null;
+};
+
+export async function listarAlunosD1(): Promise<AlunoD1[]> {
+  const supabase = createClient();
+  const semana = semanaRef();
+  const one = <T,>(v: T | T[] | null | undefined): T | null =>
+    Array.isArray(v) ? v[0] ?? null : v ?? null;
+
+  const [viewRes, fichaRes, sessRes, realRes, fbRes] = await Promise.all([
+    supabase
+      .from("kaha_alunos_semaforo")
+      .select("id, nome, telefone, objetivo, semaforo, sessoes_4sem")
+      .eq("ativo", true)
+      .order("sessoes_4sem", { ascending: true })
+      .order("nome", { ascending: true }),
+    supabase
+      .from("kaha_fichas")
+      .select("aluno_id, divisao, objetivo, kaha_ficha_exercicios(count)")
+      .eq("ativa", true),
+    supabase
+      .from("kaha_sessoes")
+      .select("aluno_id, estado, dia_semana, hora, professor_id, professor:kaha_professores(nome)")
+      .eq("semana_ref", semana)
+      .neq("estado", "cancelada"),
+    supabase
+      .from("kaha_sessoes")
+      .select("aluno_id, realizada_em")
+      .eq("estado", "realizada")
+      .not("realizada_em", "is", null)
+      .order("realizada_em", { ascending: false }),
+    supabase
+      .from("kaha_feedbacks")
+      .select("dor_queixa, created_at, sessao:kaha_sessoes(aluno_id)")
+      .eq("origem", "professor")
+      .not("dor_queixa", "is", null)
+      .order("created_at", { ascending: false }),
+  ]);
+
+  const fichaMap = new Map<string, { divisao: string | null; ex: number }>();
+  for (const f of fichaRes.data ?? []) {
+    if (fichaMap.has(f.aluno_id)) continue;
+    const cnt = one<{ count: number }>(
+      f.kaha_ficha_exercicios as { count: number } | { count: number }[] | null,
+    );
+    fichaMap.set(f.aluno_id, {
+      divisao: f.divisao || f.objetivo || null,
+      ex: cnt?.count ?? 0,
+    });
+  }
+
+  const sessMap = new Map<string, AlunoD1["sessao_semana"]>();
+  for (const s of sessRes.data ?? []) {
+    if (!s.aluno_id || sessMap.has(s.aluno_id)) continue;
+    const prof = one<{ nome: string }>(
+      s.professor as { nome: string } | { nome: string }[] | null,
+    );
+    sessMap.set(s.aluno_id, {
+      estado: s.estado as EstadoSessao,
+      dia_semana: s.dia_semana,
+      hora: s.hora.slice(0, 5),
+      professor_nome: prof?.nome ?? "—",
+      cor: corProfessor(s.professor_id).cor,
+    });
+  }
+
+  const realMap = new Map<string, string>();
+  for (const r of realRes.data ?? []) {
+    if (r.aluno_id && !realMap.has(r.aluno_id) && r.realizada_em) {
+      realMap.set(r.aluno_id, r.realizada_em);
+    }
+  }
+
+  const queixaMap = new Map<string, string>();
+  for (const fb of fbRes.data ?? []) {
+    const al = one<{ aluno_id: string }>(
+      fb.sessao as { aluno_id: string } | { aluno_id: string }[] | null,
+    );
+    if (al?.aluno_id && !queixaMap.has(al.aluno_id) && fb.dor_queixa) {
+      queixaMap.set(al.aluno_id, fb.dor_queixa);
+    }
+  }
+
+  return (viewRes.data ?? []).map((a) => {
+    const ficha = fichaMap.get(a.id);
+    const real = realMap.get(a.id);
+    const dias = real
+      ? Math.floor((Date.now() - new Date(real).getTime()) / 86_400_000)
+      : null;
+    return {
+      id: a.id,
+      nome: a.nome,
+      telefone: a.telefone,
+      objetivo: a.objetivo,
+      semaforo: a.semaforo as Semaforo,
+      sessoes_4sem: a.sessoes_4sem ?? 0,
+      tem_ficha: !!ficha,
+      ficha_divisao: ficha?.divisao ?? null,
+      ficha_ex: ficha?.ex ?? 0,
+      dor_queixa: queixaMap.get(a.id) ?? null,
+      ultimo_treino_dias: dias,
+      sessao_semana: sessMap.get(a.id) ?? null,
+    };
+  });
 }
