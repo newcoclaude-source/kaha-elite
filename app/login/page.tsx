@@ -27,7 +27,7 @@ export default function LoginPage() {
         setErro("E-mail ou senha inválidos.");
         return;
       }
-      router.replace("/dashboard");
+      router.replace("/agenda");
       router.refresh();
     });
   }
