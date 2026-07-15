@@ -4,6 +4,9 @@
 // As ESCRITAS são expostas como Server Actions em app/professores/actions.ts.
 
 import { createClient } from "@/lib/supabase/server";
+import { corProfessor } from "@/lib/kaha/cores";
+import { semanaRef } from "@/lib/kaha/sessoes";
+import { ordemDia, type EstadoSessao } from "@/lib/kaha/ui";
 
 export type Professor = {
   id: string;
@@ -244,6 +247,20 @@ export async function removerHorario(
   hora: string,
 ): Promise<void> {
   const supabase = createClient();
+
+  // Trava: não dá pra tirar disponibilidade embaixo de uma aula já marcada.
+  const { data: ocupado, error: eo } = await supabase
+    .from("kaha_sessoes")
+    .select("id")
+    .eq("professor_id", professorId)
+    .eq("dia_semana", diaSemana)
+    .eq("hora", hora)
+    .eq("semana_ref", semanaRef())
+    .neq("estado", "cancelada")
+    .maybeSingle();
+  if (eo) throw eo;
+  if (ocupado) throw new Error("SLOT_OCUPADO");
+
   const { error } = await supabase
     .from("kaha_horarios")
     .delete()
@@ -251,4 +268,119 @@ export async function removerHorario(
     .eq("dia_semana", diaSemana)
     .eq("hora", hora);
   if (error) throw error;
+}
+
+// ── D2 (Professores redesign): detalhe com stats derivados da grade real ──────
+
+export type AulaSemana = {
+  sessao_id: string;
+  dia_semana: number;
+  hora: string; // "HH:MM"
+  aluno_nome: string;
+  estado: EstadoSessao;
+  treino: string | null;
+};
+
+export type ProfessorD2 = {
+  professor: Professor;
+  cor: string;
+  soft: string;
+  horarios: { dia_semana: number; hora: string }[];
+  aulas: AulaSemana[];
+  nota_media: number | null;
+  nota_respostas: number;
+};
+
+export async function listarProfessoresD2(): Promise<ProfessorD2[]> {
+  const supabase = createClient();
+  const semana = semanaRef();
+
+  const { data: profs, error } = await supabase
+    .from("kaha_professores")
+    .select("*")
+    .eq("ativo", true)
+    .order("nome", { ascending: true });
+  if (error) throw error;
+  const ids = (profs ?? []).map((p) => p.id);
+  if (ids.length === 0) return [];
+
+  const trintaDias = new Date(Date.now() - 30 * 86_400_000).toISOString();
+  const [horRes, sesRes, fichaRes, fbRes] = await Promise.all([
+    supabase
+      .from("kaha_horarios")
+      .select("professor_id, dia_semana, hora")
+      .in("professor_id", ids),
+    supabase
+      .from("kaha_sessoes")
+      .select("id, professor_id, aluno_id, estado, dia_semana, hora, aluno:kaha_alunos(nome)")
+      .eq("semana_ref", semana)
+      .in("professor_id", ids)
+      .neq("estado", "cancelada"),
+    supabase.from("kaha_fichas").select("aluno_id, divisao, objetivo").eq("ativa", true),
+    supabase
+      .from("kaha_feedbacks")
+      .select("nota_treino, sessao:kaha_sessoes(professor_id)")
+      .eq("origem", "aluno")
+      .gte("created_at", trintaDias),
+  ]);
+
+  const norm = (h: string) => h.slice(0, 5);
+  const one = <T,>(v: T | T[] | null | undefined): T | null =>
+    Array.isArray(v) ? v[0] ?? null : v ?? null;
+
+  const fichaMap = new Map<string, string | null>();
+  for (const f of fichaRes.data ?? []) {
+    if (!fichaMap.has(f.aluno_id)) fichaMap.set(f.aluno_id, f.divisao || f.objetivo || null);
+  }
+
+  const horByProf = new Map<string, { dia_semana: number; hora: string }[]>();
+  for (const h of horRes.data ?? []) {
+    const arr = horByProf.get(h.professor_id) ?? [];
+    arr.push({ dia_semana: h.dia_semana, hora: norm(h.hora) });
+    horByProf.set(h.professor_id, arr);
+  }
+
+  const aulaByProf = new Map<string, AulaSemana[]>();
+  for (const s of sesRes.data ?? []) {
+    if (!s.professor_id) continue;
+    const aluno = one<{ nome: string }>(s.aluno as { nome: string } | { nome: string }[] | null);
+    const arr = aulaByProf.get(s.professor_id) ?? [];
+    arr.push({
+      sessao_id: s.id,
+      dia_semana: s.dia_semana,
+      hora: norm(s.hora),
+      aluno_nome: aluno?.nome ?? "Aluno",
+      estado: s.estado as EstadoSessao,
+      treino: s.aluno_id ? fichaMap.get(s.aluno_id) ?? null : null,
+    });
+    aulaByProf.set(s.professor_id, arr);
+  }
+
+  const notaByProf = new Map<string, { sum: number; n: number }>();
+  for (const fb of fbRes.data ?? []) {
+    const prof = one<{ professor_id: string }>(
+      fb.sessao as { professor_id: string } | { professor_id: string }[] | null,
+    );
+    if (!prof?.professor_id || fb.nota_treino == null) continue;
+    const cur = notaByProf.get(prof.professor_id) ?? { sum: 0, n: 0 };
+    cur.sum += fb.nota_treino;
+    cur.n += 1;
+    notaByProf.set(prof.professor_id, cur);
+  }
+
+  return (profs ?? []).map((p) => {
+    const { cor, soft } = corProfessor(p.id);
+    const nota = notaByProf.get(p.id);
+    return {
+      professor: p as Professor,
+      cor,
+      soft,
+      horarios: (horByProf.get(p.id) ?? []).sort((a, b) => a.hora.localeCompare(b.hora)),
+      aulas: (aulaByProf.get(p.id) ?? []).sort(
+        (a, b) => ordemDia(a.dia_semana) - ordemDia(b.dia_semana) || a.hora.localeCompare(b.hora),
+      ),
+      nota_media: nota ? Math.round((nota.sum / nota.n) * 10) / 10 : null,
+      nota_respostas: nota?.n ?? 0,
+    };
+  });
 }

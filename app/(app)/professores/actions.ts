@@ -54,13 +54,18 @@ export async function toggleHorarioAction(
   diaSemana: number,
   hora: string,
   marcar: boolean,
-): Promise<{ ok: boolean }> {
+): Promise<{ ok: boolean; erro?: string }> {
   try {
     if (marcar) await definirHorario(professorId, diaSemana, hora);
     else await removerHorario(professorId, diaSemana, hora);
+    revalidatePath("/professores");
     revalidatePath(`/professores/${professorId}`);
     return { ok: true };
-  } catch {
-    return { ok: false };
+  } catch (e) {
+    const erro =
+      (e as Error)?.message === "SLOT_OCUPADO"
+        ? "Há uma aula marcada nesse horário — não dá pra tirar a disponibilidade."
+        : "Não foi possível atualizar.";
+    return { ok: false, erro };
   }
 }
