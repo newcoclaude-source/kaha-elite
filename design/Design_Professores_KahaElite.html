@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaha Elite · Professores</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F5;--card:#FFFFFF;--ink:#0A0A0C;--ink-2:#3F3F46;--muted:#71717A;--muted-2:#A1A1AA;
+  --line:#E7E7EA;--line-2:#F1F1F3;
+  --red:#E11D2E;--red-2:#FF3D4D;--red-soft:#FEF2F3;
+  --ok:#15A34A;--ok-soft:#F0FDF4;--warn:#D97706;--warn-soft:#FFFBEB;--risk:#B91C1C;
+  --blue:#2563EB;--blue-soft:#EFF6FF;
+  --r:16px;
+}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh;padding:14px;gap:14px}
+
+/* SIDEBAR */
+.side{width:236px;flex:none;background:var(--ink);border-radius:20px;padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:14px;height:calc(100vh - 28px)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px}
+.brand .k{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-family:'Archivo';font-weight:900;font-style:italic;font-size:18px}
+.brand b{color:#fff;font-family:'Archivo';font-weight:800;font-style:italic;font-size:15px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand span{display:block;color:#8A8A93;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.nav-t{color:#5E5E68;font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:14px 8px 8px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;color:#A8A8B2;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px}
+.nav a svg{width:17px;height:17px;flex:none;opacity:.85}
+.nav a:hover{background:#17171B;color:#E6E6EA}
+.nav a.on{background:var(--red);color:#fff;font-weight:600}
+.nav .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px}
+.nav a.on .badge{background:#fff;color:var(--red)}
+.side .foot{margin-top:auto;border-top:1px solid #1E1E24;padding-top:14px;display:flex;align-items:center;gap:10px}
+.side .foot .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#7A0F19);display:grid;place-items:center;color:#fff;font-size:11.5px;font-weight:700}
+.side .foot b{color:#EDEDF0;font-size:12.5px;display:block;line-height:1.3}
+.side .foot span{color:#6C6C76;font-size:10.5px}
+
+/* TOPO */
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.top .h{flex:1;min-width:160px}
+.top h1{font-family:'Archivo';font-weight:800;font-style:italic;font-size:22px;text-transform:uppercase;line-height:1.1}
+.top p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.btn.ghost{background:var(--card);color:var(--ink-2);border:1px solid var(--line)}
+
+.wrap{display:grid;grid-template-columns:258px 1fr;gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-width:0}
+.card.pad{padding:18px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;height:20px;margin-bottom:14px;flex:none}
+.card-h h3{font-size:13px;font-weight:700;line-height:20px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-h .act{font-size:11.5px;color:var(--muted);font-weight:500;line-height:20px;text-decoration:none}
+
+/* LISTA DE PROFESSORES */
+.plist{display:flex;flex-direction:column;gap:6px}
+.p{display:flex;align-items:center;gap:11px;padding:10px;border-radius:11px;cursor:pointer;border:1px solid transparent}
+.p:hover{background:#FCFCFD;border-color:var(--line)}
+.p.on{background:var(--ink);border-color:var(--ink)}
+.p .pav{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:12px;font-weight:700;flex:none;background:var(--s);color:var(--c);border:1.5px solid var(--c)}
+.p .pn{flex:1;min-width:0}
+.p .pn b{font-size:13px;font-weight:600;display:block;line-height:1.3}
+.p .pn span{font-size:11px;color:var(--muted)}
+.p.on .pn b{color:#fff}
+.p.on .pn span{color:#8A8A93}
+.p .pc{font-size:11px;color:var(--muted);font-weight:600;white-space:nowrap}
+.p.on .pc{color:#8A8A93}
+.p .off{font-size:9.5px;font-weight:700;color:var(--muted-2);background:var(--line-2);padding:2px 6px;border-radius:20px}
+
+/* DETALHE */
+.ph{display:flex;align-items:center;gap:14px;padding:18px;border-bottom:1px solid var(--line)}
+.ph .big{width:56px;height:56px;border-radius:16px;display:grid;place-items:center;font-family:'Archivo';font-style:italic;font-weight:900;font-size:20px;flex:none;background:var(--s);color:var(--c);border:2px solid var(--c)}
+.ph .pi{flex:1;min-width:0}
+.ph .pi h2{font-family:'Archivo';font-style:italic;font-weight:800;font-size:19px;line-height:1.15}
+.ph .pi .meta{display:flex;align-items:center;gap:12px;margin-top:5px;flex-wrap:wrap}
+.ph .pi .meta span{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.ph .pi .meta svg{width:13px;height:13px}
+.chip{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.ph .pa{display:flex;gap:7px;flex:none}
+.ic{height:32px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--card);display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--ink-2);font-size:11.5px;font-weight:600;font-family:inherit}
+.ic:hover{border-color:var(--muted-2)}
+.ic svg{width:13px;height:13px}
+
+/* stats */
+.sts{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--line)}
+.st{padding:15px 18px;border-right:1px solid var(--line-2)}
+.st:last-child{border-right:none}
+.st .l{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-bottom:7px}
+.st .v{font-family:'Archivo';font-style:italic;font-weight:900;font-size:24px;line-height:1}
+.st .v small{font-size:13px;color:var(--muted-2);font-style:normal;font-weight:600}
+.st .d{font-size:11px;color:var(--muted);margin-top:4px}
+.st .d b{color:var(--ok)}
+
+/* GRADE */
+.gwrap{padding:18px}
+.gh{display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;gap:10px;flex-wrap:wrap}
+.gh h3{font-size:13px;font-weight:700}
+.gh p{font-size:11.5px;color:var(--muted);margin-top:2px}
+.grade{display:grid;grid-template-columns:46px repeat(7,1fr);gap:4px;min-width:520px}
+.grade .hd{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);text-align:center;padding-bottom:4px}
+.grade .hr{font-size:10.5px;color:var(--muted-2);display:flex;align-items:center;justify-content:flex-end;padding-right:7px;height:28px}
+.cel{height:28px;border-radius:6px;background:var(--line-2);cursor:pointer;border:1px solid transparent;transition:.1s}
+.cel:hover{border-color:var(--c);background:var(--s)}
+.cel.on{background:var(--s);border-color:var(--c)}
+.cel.busy{background:var(--c);border-color:var(--c);display:grid;place-items:center}
+.cel.busy svg{width:11px;height:11px;color:#fff;opacity:.9}
+.gscroll{overflow-x:auto}
+.gleg{display:flex;align-items:center;gap:16px;margin-top:14px;flex-wrap:wrap}
+.gleg div{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.gleg i{width:12px;height:12px;border-radius:4px;flex:none}
+
+/* AULAS DA SEMANA */
+.row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.row:last-child{border:none}
+.row .hh{font-family:'Archivo';font-style:italic;font-weight:800;font-size:13px;width:78px;flex:none;color:var(--ink-2)}
+.row .av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:10.5px;font-weight:700;flex:none;background:#F1F1F3;color:var(--ink-2)}
+.row .w{flex:1;min-width:0}
+.row .w b{font-size:12.5px;font-weight:600;display:block}
+.row .w span{font-size:10.5px;color:var(--muted)}
+.sc{font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;white-space:nowrap}
+.sc.done{background:var(--ok-soft);color:var(--ok)}
+.sc.conf{background:var(--blue-soft);color:var(--blue)}
+.sc.wait{background:var(--warn-soft);color:var(--warn)}
+
+.bnav{display:none}
+@media(max-width:1000px){ .wrap{grid-template-columns:1fr} .sts{grid-template-columns:1fr 1fr} }
+@media(max-width:900px){
+  .app{padding:0;gap:0}
+  .side{display:none}
+  .main{padding:14px 14px 86px}
+  .top h1{font-size:19px}
+  .ph{flex-wrap:wrap}
+  .ph .pa{width:100%}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--ink);padding:9px 6px calc(9px + env(safe-area-inset-bottom));z-index:9}
+  .bnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#7C7C86;text-decoration:none;font-size:9.5px;font-weight:600;padding:5px 0}
+  .bnav a svg{width:19px;height:19px}
+  .bnav a.on{color:#fff}
+  .bnav a.on svg{color:var(--red-2)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="side">
+    <div class="brand"><div class="k">K</div><div><b>CT Kaha</b><span>Elite</span></div></div>
+    <div class="nav-t">Menu</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Alunos<span class="badge">22</span></a>
+      <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Professores</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas<span class="badge">8</span></a>
+    </nav>
+    <div class="nav-t">Geral</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configurações</a>
+    </nav>
+    <div class="foot"><div class="av">JC</div><div><b>Gestor Kaha</b><span>elite@ctkaha.com.br</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div class="h">
+        <h1>Professores</h1>
+        <p>Quem atende, quando atende e quanto espaço ainda tem.</p>
+      </div>
+      <button class="btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        Novo professor
+      </button>
+    </div>
+
+    <div class="wrap">
+
+      <!-- LISTA -->
+      <div class="card pad">
+        <div class="card-h"><h3>Time</h3><span class="act">4 ativos</span></div>
+        <div class="plist">
+          <div class="p on" style="--c:#E11D2E;--s:#FEF2F3">
+            <div class="pav">RA</div>
+            <div class="pn"><b>Rafael</b><span>Hipertrofia</span></div>
+            <span class="pc">9</span>
+          </div>
+          <div class="p" style="--c:#2563EB;--s:#EFF6FF">
+            <div class="pav">BR</div>
+            <div class="pn"><b>Bruna</b><span>Emagrecimento</span></div>
+            <span class="pc">7</span>
+          </div>
+          <div class="p" style="--c:#15A34A;--s:#F0FDF4">
+            <div class="pav">DI</div>
+            <div class="pn"><b>Diego</b><span>Performance</span></div>
+            <span class="pc">5</span>
+          </div>
+          <div class="p" style="--c:#7C3AED;--s:#F5F3FF">
+            <div class="pav">LU</div>
+            <div class="pn"><b>Lucas</b><span>Funcional</span></div>
+            <span class="pc">2</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- DETALHE DO PROFESSOR -->
+      <div class="card" style="--c:#E11D2E;--s:#FEF2F3">
+
+        <div class="ph">
+          <div class="big">RA</div>
+          <div class="pi">
+            <h2>Rafael Almeida</h2>
+            <div class="meta">
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v6a6 6 0 0 0 12 0V2M4 22h16"/></svg>Hipertrofia</span>
+              <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>(11) 98812-4400</span>
+              <span class="chip ok">Ativo</span>
+            </div>
+          </div>
+          <div class="pa">
+            <button class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 0 1 3 3L12 15l-4 1 1-4z"/></svg>Editar</button>
+            <button class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg></button>
+          </div>
+        </div>
+
+        <div class="sts">
+          <div class="st">
+            <div class="l">Aulas esta semana</div>
+            <div class="v">9</div>
+            <div class="d"><b>+2</b> vs. semana passada</div>
+          </div>
+          <div class="st">
+            <div class="l">Horários na grade</div>
+            <div class="v">49<small>/sem</small></div>
+            <div class="d">Seg a sáb</div>
+          </div>
+          <div class="st">
+            <div class="l">Ainda livres</div>
+            <div class="v" style="color:var(--red)">40</div>
+            <div class="d">espaço pra mais alunos</div>
+          </div>
+          <div class="st">
+            <div class="l">Nota dos alunos dele</div>
+            <div class="v">4,8<small>/5</small></div>
+            <div class="d">6 respostas no mês</div>
+          </div>
+        </div>
+
+        <!-- GRADE DE HORÁRIOS -->
+        <div class="gwrap">
+          <div class="gh">
+            <div>
+              <h3>Grade de horários</h3>
+              <p>Toque para marcar quando o Rafael atende. Horários com aula marcada ficam travados.</p>
+            </div>
+            <button class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>Copiar semana anterior</button>
+          </div>
+
+          <div class="gscroll">
+            <div class="grade">
+              <div></div>
+              <div class="hd">Seg</div><div class="hd">Ter</div><div class="hd">Qua</div>
+              <div class="hd">Qui</div><div class="hd">Sex</div><div class="hd">Sáb</div><div class="hd">Dom</div>
+
+              <div class="hr">06:00</div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">07:00</div>
+              <div class="cel on"></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel on"></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">08:00</div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel on"></div>
+              <div class="cel on"></div><div class="cel"></div>
+
+              <div class="hr">09:00</div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel"></div>
+
+              <div class="hr">10:00</div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel"></div>
+
+              <div class="hr">11:00</div>
+              <div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel on"></div><div class="cel"></div>
+
+              <div class="hr">12:00</div>
+              <div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">17:00</div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">18:00</div>
+              <div class="cel on"></div><div class="cel on"></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">19:00</div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel on"></div><div class="cel on"></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel on"></div><div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">20:00</div>
+              <div class="cel on"></div><div class="cel on"></div><div class="cel on"></div><div class="cel on"></div>
+              <div class="cel busy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="cel"></div><div class="cel"></div>
+
+              <div class="hr">21:00</div>
+              <div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div><div class="cel"></div>
+            </div>
+          </div>
+
+          <div class="gleg">
+            <div><i style="background:#FEF2F3;border:1px solid #E11D2E"></i>Atende</div>
+            <div><i style="background:#E11D2E"></i>Com aula marcada</div>
+            <div><i style="background:#F1F1F3"></i>Não atende</div>
+            <div style="margin-left:auto;color:var(--red);font-weight:600">40 horários livres nesta semana</div>
+          </div>
+        </div>
+
+        <!-- AULAS DA SEMANA -->
+        <div class="gwrap" style="border-top:1px solid var(--line)">
+          <div class="card-h" style="margin-bottom:8px">
+            <h3>Aulas do Rafael · esta semana</h3>
+            <span class="act">9 aulas</span>
+          </div>
+          <div class="row">
+            <div class="hh">Seg 08:00</div><div class="av">BA</div>
+            <div class="w"><b>Bruno Alves</b><span>Costas e bíceps</span></div>
+            <span class="sc done">Realizada</span>
+          </div>
+          <div class="row">
+            <div class="hh">Seg 19:00</div><div class="av">CM</div>
+            <div class="w"><b>Carla Menezes</b><span>Pernas completo</span></div>
+            <span class="sc done">Realizada</span>
+          </div>
+          <div class="row">
+            <div class="hh">Ter 07:00</div><div class="av">ER</div>
+            <div class="w"><b>Eduardo Rocha</b><span>Peito e tríceps · PR no supino</span></div>
+            <span class="sc done">Realizada</span>
+          </div>
+          <div class="row">
+            <div class="hh">Ter 08:00</div><div class="av">DM</div>
+            <div class="w"><b>Daniela Martins</b><span>Costas e bíceps</span></div>
+            <span class="sc done">Realizada</span>
+          </div>
+          <div class="row">
+            <div class="hh">Qua 07:00</div><div class="av">TM</div>
+            <div class="w"><b>Tiago Moreira</b><span>Ombros e abdômen</span></div>
+            <span class="sc conf">Confirmada</span>
+          </div>
+          <div class="row">
+            <div class="hh">Qua 18:00</div><div class="av">VR</div>
+            <div class="w"><b>Vitor Ramos</b><span>Costas e bíceps</span></div>
+            <span class="sc conf">Confirmada</span>
+          </div>
+          <div class="row">
+            <div class="hh">Qui 19:00</div><div class="av">AP</div>
+            <div class="w"><b>André Pinto</b><span>Peito e tríceps</span></div>
+            <span class="sc wait">Aguarda</span>
+          </div>
+          <div class="row">
+            <div class="hh">Sex 07:00</div><div class="av">CM</div>
+            <div class="w"><b>Carla Menezes</b><span>Pernas completo</span></div>
+            <span class="sc wait">Aguarda</span>
+          </div>
+          <div class="row">
+            <div class="hh">Sáb 09:00</div><div class="av">BS</div>
+            <div class="w"><b>Beatriz Souto</b><span>Glúteos e posterior</span></div>
+            <span class="sc conf">Confirmada</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="bnav">
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Alunos</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas</a>
+  <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Mais</a>
+</nav>
+</body>
+</html>

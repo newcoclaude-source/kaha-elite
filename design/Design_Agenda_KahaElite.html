@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaha Elite · Agenda</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F5;--card:#FFFFFF;--ink:#0A0A0C;--ink-2:#3F3F46;--muted:#71717A;--muted-2:#A1A1AA;
+  --line:#E7E7EA;--line-2:#F1F1F3;
+  --red:#E11D2E;--red-2:#FF3D4D;--red-soft:#FEF2F3;
+  --ok:#15A34A;--ok-soft:#F0FDF4;--warn:#D97706;--warn-soft:#FFFBEB;--risk:#B91C1C;
+  --blue:#2563EB;--blue-soft:#EFF6FF;
+  --r:16px;--h:48px;
+}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh;padding:14px;gap:14px}
+
+/* SIDEBAR (mesma régua do dashboard) */
+.side{width:236px;flex:none;background:var(--ink);border-radius:20px;padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:14px;height:calc(100vh - 28px)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px}
+.brand .k{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-family:'Archivo';font-weight:900;font-style:italic;font-size:18px}
+.brand b{color:#fff;font-family:'Archivo';font-weight:800;font-style:italic;font-size:15px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand span{display:block;color:#8A8A93;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.nav-t{color:#5E5E68;font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:14px 8px 8px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;color:#A8A8B2;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px}
+.nav a svg{width:17px;height:17px;flex:none;opacity:.85}
+.nav a:hover{background:#17171B;color:#E6E6EA}
+.nav a.on{background:var(--red);color:#fff;font-weight:600}
+.nav .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px}
+.nav a.on .badge{background:#fff;color:var(--red)}
+.side .foot{margin-top:auto;border-top:1px solid #1E1E24;padding-top:14px;display:flex;align-items:center;gap:10px}
+.side .foot .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#7A0F19);display:grid;place-items:center;color:#fff;font-size:11.5px;font-weight:700}
+.side .foot b{color:#EDEDF0;font-size:12.5px;display:block;line-height:1.3}
+.side .foot span{color:#6C6C76;font-size:10.5px}
+
+/* TOPO */
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.top .h{flex:1;min-width:170px}
+.top h1{font-family:'Archivo';font-weight:800;font-style:italic;font-size:22px;text-transform:uppercase;line-height:1.1}
+.top p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.nav-wk{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px}
+.nav-wk button{background:none;border:none;width:28px;height:28px;border-radius:7px;display:grid;place-items:center;cursor:pointer;color:var(--ink-2)}
+.nav-wk button:hover{background:var(--line-2)}
+.nav-wk .today{width:auto;padding:0 11px;font-size:12px;font-weight:600;font-family:inherit}
+.range{font-family:'Archivo';font-style:italic;font-weight:800;font-size:15px;white-space:nowrap;padding:0 2px}
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:3px;gap:2px}
+.seg button{background:none;border:none;padding:6px 12px;border-radius:7px;font-size:12px;font-weight:600;font-family:inherit;color:var(--muted);cursor:pointer}
+.seg button.on{background:var(--ink);color:#fff}
+.btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap}
+
+/* LAYOUT */
+.wrap{display:grid;grid-template-columns:1fr 274px;gap:14px;align-items:start;flex:1;min-height:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-width:0}
+.card.pad{padding:18px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;height:20px;margin-bottom:14px;flex:none}
+.card-h h3{font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:20px}
+.card-h .act{font-size:11.5px;color:var(--muted);font-weight:500;white-space:nowrap;line-height:20px;text-decoration:none}
+
+/* CALENDÁRIO */
+.cal{overflow:hidden}
+.cal-head{display:grid;grid-template-columns:54px repeat(7,1fr);border-bottom:1px solid var(--line);flex:none}
+.cal-head .cnr{border-right:1px solid var(--line-2)}
+.cal-head .d{padding:11px 6px 9px;text-align:center;border-right:1px solid var(--line-2)}
+.cal-head .d:last-child{border-right:none}
+.cal-head .d small{display:block;font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.cal-head .d b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:18px;line-height:1;display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%}
+.cal-head .d.now small{color:var(--red)}
+.cal-head .d.now b{background:var(--red);color:#fff}
+.cal-body{position:relative;overflow:auto;flex:1}
+.cal-grid{display:grid;grid-template-columns:54px repeat(7,1fr);position:relative}
+.tcol{border-right:1px solid var(--line-2)}
+.tcol .t{height:var(--h);position:relative}
+.tcol .t span{position:absolute;top:-7px;right:7px;font-size:10.5px;color:var(--muted-2);background:var(--card);padding:0 2px}
+.dcol{position:relative;border-right:1px solid var(--line-2)}
+.dcol:last-child{border-right:none}
+.dcol.now{background:#FFFAFA}
+.dcol .slot{height:var(--h);border-bottom:1px solid var(--line-2)}
+
+/* eventos */
+.ev{position:absolute;left:3px;right:3px;height:calc(var(--h) - 4px);border-radius:7px;padding:5px 7px;overflow:hidden;cursor:pointer;border-left:3px solid var(--c);background:var(--s);display:flex;flex-direction:column;justify-content:center;gap:1px}
+.ev b{font-size:11px;font-weight:700;color:var(--d);line-height:1.15;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev span{font-size:9.5px;color:var(--d);opacity:.72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ev .st{position:absolute;top:5px;right:6px;width:12px;height:12px;color:var(--d);opacity:.75}
+.ev.rafael{--c:#E11D2E;--s:#FEF2F3;--d:#9F1239}
+.ev.bruna{--c:#2563EB;--s:#EFF6FF;--d:#1E40AF}
+.ev.diego{--c:#15A34A;--s:#F0FDF4;--d:#166534}
+.ev.lucas{--c:#7C3AED;--s:#F5F3FF;--d:#5B21B6}
+.ev.done{opacity:.52}
+.ev.wait{background:var(--card);border:1px dashed var(--c);border-left:3px solid var(--c)}
+.ev.miss{background:repeating-linear-gradient(45deg,#FAFAFA,#FAFAFA 5px,#F1F1F3 5px,#F1F1F3 10px);border-left:3px solid var(--muted-2)}
+.ev.miss b{color:var(--muted);text-decoration:line-through}
+.ev.miss span{color:var(--muted-2)}
+
+/* horário livre = a informação que o GCal não tem */
+.free{position:absolute;left:3px;right:3px;height:calc(var(--h) - 4px);border:1px dashed var(--line);border-radius:7px;display:flex;align-items:center;justify-content:center;gap:4px;cursor:pointer;color:var(--muted-2);font-size:9.5px;font-weight:600}
+.free:hover{border-color:var(--red);border-style:solid;background:var(--red-soft);color:var(--red)}
+.free svg{width:10px;height:10px}
+
+/* toggle horários livres */
+.tgl{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--ink-2);cursor:pointer;white-space:nowrap}
+.tgl input{appearance:none;width:30px;height:17px;border-radius:20px;background:var(--line);position:relative;cursor:pointer;flex:none;transition:background .15s}
+.tgl input::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform .15s}
+.tgl input:checked{background:var(--red)}
+.tgl input:checked::after{transform:translateX(13px)}
+
+/* popover de detalhe (padrão Google Calendar) */
+.pop{position:absolute;width:262px;background:var(--card);border:1px solid var(--line);border-radius:14px;box-shadow:0 16px 42px rgba(10,10,12,.16),0 3px 10px rgba(10,10,12,.06);z-index:10;overflow:hidden}
+.pop::before{content:'';position:absolute;left:-6px;top:26px;width:10px;height:10px;background:var(--card);border-left:1px solid var(--line);border-bottom:1px solid var(--line);transform:rotate(45deg)}
+.pop .ph{display:flex;align-items:flex-start;gap:9px;padding:14px 14px 0}
+.pop .cbar{width:4px;border-radius:3px;background:var(--c);flex:none;align-self:stretch;min-height:34px}
+.pop .pt{flex:1;min-width:0}
+.pop .pt b{font-size:14px;font-weight:700;display:block;line-height:1.25}
+.pop .pt span{font-size:11.5px;color:var(--muted);display:block;margin-top:2px}
+.pop .x{background:none;border:none;color:var(--muted-2);cursor:pointer;padding:1px;flex:none}
+.pop .pb-i{padding:12px 14px;display:flex;flex-direction:column;gap:9px}
+.pop .li{display:flex;align-items:center;gap:9px;font-size:11.5px;color:var(--ink-2)}
+.pop .li svg{width:14px;height:14px;color:var(--muted-2);flex:none}
+.pop .acts{display:flex;gap:7px;padding:0 14px 14px}
+.pop .acts button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--ink-2);border-radius:9px;padding:9px;font-size:11.5px;font-weight:600;font-family:inherit;cursor:pointer}
+.pop .acts button:hover{border-color:var(--muted-2)}
+.pop .acts button.pri{background:var(--red);border-color:var(--red);color:#fff;flex:1.4}
+.pop .acts button.pri:hover{background:var(--red-2)}
+
+/* linha de agora */
+.nowline{position:absolute;left:54px;right:0;height:0;border-top:2px solid var(--red);z-index:3;pointer-events:none}
+.nowline::before{content:'';position:absolute;left:-5px;top:-5px;width:9px;height:9px;border-radius:50%;background:var(--red)}
+
+/* legenda */
+.leg{display:flex;align-items:center;gap:16px;padding:11px 14px;border-top:1px solid var(--line);flex-wrap:wrap;flex:none}
+.leg div{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted)}
+.leg i{width:9px;height:9px;border-radius:3px;flex:none}
+.leg i.dash{border:1px dashed var(--muted-2);background:none;border-radius:3px}
+.leg i.hatch{background:repeating-linear-gradient(45deg,#FAFAFA,#FAFAFA 3px,#E7E7EA 3px,#E7E7EA 6px)}
+
+/* RAIL */
+.rail{display:flex;flex-direction:column;gap:14px}
+.mini .mh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.mini .mh b{font-size:12.5px;font-weight:700}
+.mini .mh button{background:none;border:none;cursor:pointer;color:var(--muted);padding:2px}
+.mini table{width:100%;border-collapse:collapse}
+.mini th{font-size:9.5px;color:var(--muted-2);font-weight:600;padding-bottom:5px}
+.mini td{text-align:center;padding:1px}
+.mini td span{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font-size:11px;color:var(--ink-2);cursor:pointer}
+.mini td span:hover{background:var(--line-2)}
+.mini td.out span{color:var(--muted-2);opacity:.5}
+.mini tr.wk{background:var(--red-soft);border-radius:8px}
+.mini td.now span{background:var(--red);color:#fff;font-weight:700}
+
+.pf{display:flex;align-items:center;gap:9px;padding:7px 0;cursor:pointer}
+.pf input{appearance:none;width:15px;height:15px;border-radius:4px;border:1.5px solid var(--line);cursor:pointer;flex:none;position:relative}
+.pf input:checked{background:var(--pc);border-color:var(--pc)}
+.pf input:checked::after{content:'';position:absolute;left:4.5px;top:1.5px;width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.pf .nm{font-size:12.5px;font-weight:500;flex:1}
+.pf .ct{font-size:11px;color:var(--muted)}
+
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.row:last-child{border:none}
+.av{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;font-size:10.5px;font-weight:700;flex:none;background:#F1F1F3;color:var(--ink-2)}
+.row .who{flex:1;min-width:0}
+.row .who b{font-size:12.5px;font-weight:600;display:block}
+.row .who span{font-size:10.5px;color:var(--muted)}
+.mini-b{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:6px 9px;font-size:10.5px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+
+/* DIA (mobile) */
+.day{display:none}
+.day .dh{display:flex;align-items:center;justify-content:space-between;padding:0 0 12px}
+.day .dh b{font-family:'Archivo';font-style:italic;font-weight:800;font-size:16px}
+.dr{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line-2)}
+.dr:last-child{border:none}
+.dr .hr{font-family:'Archivo';font-style:italic;font-weight:800;font-size:14px;width:44px;flex:none;padding-top:2px}
+.dr .bx{flex:1;border-left:3px solid var(--c);background:var(--s);border-radius:8px;padding:9px 11px;min-width:0}
+.dr .bx b{font-size:13px;display:block;color:var(--d)}
+.dr .bx span{font-size:11px;color:var(--d);opacity:.75}
+.dr.rafael{--c:#E11D2E;--s:#FEF2F3;--d:#9F1239}
+.dr.bruna{--c:#2563EB;--s:#EFF6FF;--d:#1E40AF}
+.dr.diego{--c:#15A34A;--s:#F0FDF4;--d:#166534}
+.dr .fr{flex:1;border:1px dashed var(--line);border-radius:8px;padding:9px 11px;color:var(--muted-2);font-size:11.5px;font-weight:600;display:flex;align-items:center;gap:6px}
+.chip{font-size:10px;font-weight:700;padding:3px 7px;border-radius:20px;white-space:nowrap;margin-top:5px;display:inline-block}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.conf{background:var(--blue-soft);color:var(--blue)}
+.chip.wait{background:var(--warn-soft);color:var(--warn)}
+
+.bnav{display:none}
+@media(max-width:1100px){ .wrap{grid-template-columns:1fr} .rail{display:grid;grid-template-columns:1fr 1fr;gap:14px} .mini{display:none} }
+@media(max-width:900px){
+  .app{padding:0;gap:0}
+  .side{display:none}
+  .main{padding:14px 14px 86px}
+  .cal,.seg{display:none}
+  .day{display:flex;flex-direction:column;padding:18px}
+  .rail{grid-template-columns:1fr}
+  .top h1{font-size:19px}
+  .range{font-size:13.5px}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--ink);padding:9px 6px calc(9px + env(safe-area-inset-bottom));z-index:9}
+  .bnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#7C7C86;text-decoration:none;font-size:9.5px;font-weight:600;padding:5px 0}
+  .bnav a svg{width:19px;height:19px}
+  .bnav a.on{color:#fff}
+  .bnav a.on svg{color:var(--red-2)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="side">
+    <div class="brand"><div class="k">K</div><div><b>CT Kaha</b><span>Elite</span></div></div>
+    <div class="nav-t">Menu</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Alunos<span class="badge">22</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Professores</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas<span class="badge">8</span></a>
+    </nav>
+    <div class="nav-t">Geral</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configurações</a>
+    </nav>
+    <div class="foot"><div class="av">JC</div><div><b>Gestor Kaha</b><span>elite@ctkaha.com.br</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div class="h">
+        <h1>Agenda</h1>
+        <p>Quem treina, com quem e a que horas.</p>
+      </div>
+      <div class="nav-wk">
+        <button><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+        <button class="today">Hoje</button>
+        <button><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+      </div>
+      <div class="range">13 – 19 de julho</div>
+      <div class="seg">
+        <button>Dia</button><button class="on">Semana</button><button>Mês</button>
+      </div>
+      <label class="tgl"><input type="checkbox" checked>Horários livres</label>
+      <button class="btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        Marcar sessão
+      </button>
+    </div>
+
+    <div class="wrap">
+
+      <!-- CALENDÁRIO SEMANAL -->
+      <div class="card cal">
+        <div class="cal-head">
+          <div class="cnr"></div>
+          <div class="d"><small>Seg</small><b>13</b></div>
+          <div class="d now"><small>Ter</small><b>14</b></div>
+          <div class="d"><small>Qua</small><b>15</b></div>
+          <div class="d"><small>Qui</small><b>16</b></div>
+          <div class="d"><small>Sex</small><b>17</b></div>
+          <div class="d"><small>Sáb</small><b>18</b></div>
+          <div class="d"><small>Dom</small><b>19</b></div>
+        </div>
+
+        <div class="cal-body">
+          <div class="cal-grid">
+            <!-- coluna de horas -->
+            <div class="tcol">
+              <div class="t"><span>06:00</span></div><div class="t"><span>07:00</span></div>
+              <div class="t"><span>08:00</span></div><div class="t"><span>09:00</span></div>
+              <div class="t"><span>10:00</span></div><div class="t"><span>11:00</span></div>
+              <div class="t"><span>12:00</span></div><div class="t"><span>13:00</span></div>
+              <div class="t"><span>14:00</span></div><div class="t"><span>15:00</span></div>
+              <div class="t"><span>16:00</span></div><div class="t"><span>17:00</span></div>
+              <div class="t"><span>18:00</span></div><div class="t"><span>19:00</span></div>
+              <div class="t"><span>20:00</span></div><div class="t"><span>21:00</span></div>
+            </div>
+
+            <!-- SEG 13 -->
+            <div class="dcol">
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="ev rafael done" style="top:50px"><b>Bruno Alves</b><span>Rafael · Costas</span>
+                <svg class="st" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="ev bruna done" style="top:290px"><b>Paula Correia</b><span>Bruna · Pernas</span>
+                <svg class="st" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="ev diego done" style="top:626px"><b>Igor Nunes</b><span>Diego · Peito</span>
+                <svg class="st" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="ev lucas miss" style="top:674px"><b>Sofia Lima</b><span>Lucas · faltou</span></div>
+            </div>
+
+            <!-- TER 14 (hoje) -->
+            <div class="dcol now">
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="ev rafael done" style="top:50px"><b>Eduardo Rocha</b><span>Rafael · Peito</span>
+                <svg class="st" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="ev rafael done" style="top:98px"><b>Daniela Martins</b><span>Rafael · Costas</span>
+                <svg class="st" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="free" style="top:194px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+              <div class="ev bruna" style="top:290px"><b>Lucas Brandão</b><span>Bruna · Pernas</span></div>
+              <div class="ev bruna" style="top:578px"><b>Camila Duarte</b><span>Bruna · Ombros</span></div>
+              <div class="ev diego wait" style="top:626px"><b>Marcelo Silva</b><span>Diego · Peito</span></div>
+              <div class="ev diego wait" style="top:674px"><b>Rafaela Antunes</b><span>Diego · Pernas</span></div>
+            </div>
+
+            <!-- QUA 15 -->
+            <div class="dcol">
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="ev rafael" style="top:50px"><b>Tiago Moreira</b><span>Rafael · Ombros</span></div>
+              <div class="free" style="top:98px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+              <div class="ev bruna" style="top:530px"><b>Helena Castro</b><span>Bruna · Glúteos</span></div>
+              <div class="ev rafael" style="top:578px"><b>Vitor Ramos</b><span>Rafael · Costas</span></div>
+              <div class="free" style="top:626px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+            </div>
+
+            <!-- QUI 16 -->
+            <div class="dcol">
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="ev diego" style="top:50px"><b>Renata Dias</b><span>Diego · Pernas</span></div>
+              <div class="ev rafael" style="top:290px"><b>André Pinto</b><span>Rafael · Peito</span></div>
+              <div class="ev bruna" style="top:578px"><b>Juliana Reis</b><span>Bruna · Costas</span></div>
+              <div class="free" style="top:626px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+              <div class="ev lucas" style="top:674px"><b>Pedro Sales</b><span>Lucas · Ombros</span></div>
+            </div>
+
+            <!-- SEX 17 -->
+            <div class="dcol">
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="ev rafael" style="top:50px"><b>Carla Menezes</b><span>Rafael · Pernas</span></div>
+              <div class="free" style="top:242px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+              <div class="ev bruna" style="top:530px"><b>Diego Fontes</b><span>Bruna · Peito</span></div>
+              <div class="ev diego" style="top:578px"><b>Larissa Melo</b><span>Diego · Costas</span></div>
+              <div class="free" style="top:674px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+            </div>
+
+            <!-- SÁB 18 -->
+            <div class="dcol">
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="slot"></div><div class="slot"></div><div class="slot"></div><div class="slot"></div>
+              <div class="ev rafael" style="top:146px"><b>Beatriz Souto</b><span>Rafael · Glúteos</span></div>
+              <div class="free" style="top:194px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+              <div class="free" style="top:242px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>livre</div>
+            </div>
+
+            <!-- DOM 19 -->
+            <div class="dcol"></div>
+
+            <!-- agora: terça, 14:20 -->
+            <div class="nowline" style="top:400px"></div>
+
+            <!-- POPOVER: clique na aula das 18h (Camila · Bruna) -->
+            <div class="pop" style="--c:#2563EB;left:calc(54px + (100% - 54px) * 3 / 7 + 8px);top:552px">
+              <div class="ph">
+                <div class="cbar"></div>
+                <div class="pt">
+                  <b>Camila Duarte</b>
+                  <span>Terça, 14 de julho · 18:00 – 19:00</span>
+                </div>
+                <button class="x"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <div class="pb-i">
+                <div class="li">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                  com <b style="font-weight:600">Bruna</b>
+                </div>
+                <div class="li">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2v6a6 6 0 0 0 12 0V2M4 22h16"/></svg>
+                  Ombros e abdômen · 6 exercícios
+                </div>
+                <div class="li">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+                  Último treino há 5 dias
+                </div>
+                <div class="li">
+                  <span class="chip conf" style="margin:0">Confirmada</span>
+                </div>
+              </div>
+              <div class="acts">
+                <button class="pri">Dar o treino</button>
+                <button>Remarcar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="leg">
+          <div><i style="background:#E11D2E"></i>Rafael</div>
+          <div><i style="background:#2563EB"></i>Bruna</div>
+          <div><i style="background:#15A34A"></i>Diego</div>
+          <div><i style="background:#7C3AED"></i>Lucas</div>
+          <div style="margin-left:auto"><i class="dash"></i>Aguarda confirmação</div>
+          <div><svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="#71717A" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>Realizada</div>
+          <div><i class="hatch"></i>Faltou</div>
+        </div>
+      </div>
+
+      <!-- RAIL -->
+      <div class="rail">
+
+        <div class="card pad mini">
+          <div class="mh">
+            <b>Julho 2026</b>
+            <div style="display:flex;gap:2px">
+              <button><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+              <button><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg></button>
+            </div>
+          </div>
+          <table>
+            <tr><th>S</th><th>T</th><th>Q</th><th>Q</th><th>S</th><th>S</th><th>D</th></tr>
+            <tr><td class="out"><span>29</span></td><td class="out"><span>30</span></td><td><span>1</span></td><td><span>2</span></td><td><span>3</span></td><td><span>4</span></td><td><span>5</span></td></tr>
+            <tr><td><span>6</span></td><td><span>7</span></td><td><span>8</span></td><td><span>9</span></td><td><span>10</span></td><td><span>11</span></td><td><span>12</span></td></tr>
+            <tr class="wk"><td><span>13</span></td><td class="now"><span>14</span></td><td><span>15</span></td><td><span>16</span></td><td><span>17</span></td><td><span>18</span></td><td><span>19</span></td></tr>
+            <tr><td><span>20</span></td><td><span>21</span></td><td><span>22</span></td><td><span>23</span></td><td><span>24</span></td><td><span>25</span></td><td><span>26</span></td></tr>
+            <tr><td><span>27</span></td><td><span>28</span></td><td><span>29</span></td><td><span>30</span></td><td><span>31</span></td><td class="out"><span>1</span></td><td class="out"><span>2</span></td></tr>
+          </table>
+        </div>
+
+        <div class="card pad">
+          <div class="card-h"><h3>Professores</h3><span class="act">23 aulas</span></div>
+          <label class="pf" style="--pc:#E11D2E"><input type="checkbox" checked><span class="nm">Rafael</span><span class="ct">9</span></label>
+          <label class="pf" style="--pc:#2563EB"><input type="checkbox" checked><span class="nm">Bruna</span><span class="ct">7</span></label>
+          <label class="pf" style="--pc:#15A34A"><input type="checkbox" checked><span class="nm">Diego</span><span class="ct">5</span></label>
+          <label class="pf" style="--pc:#7C3AED"><input type="checkbox" checked><span class="nm">Lucas</span><span class="ct">2</span></label>
+        </div>
+
+        <div class="card pad">
+          <div class="card-h"><h3>Sem sessão esta semana</h3><span class="act">3</span></div>
+          <div class="row">
+            <div class="av" style="background:#FEF2F3;color:#B91C1C">JP</div>
+            <div class="who"><b>Julio Prado</b><span>2 semanas sem treinar</span></div>
+            <button class="mini-b">Marcar</button>
+          </div>
+          <div class="row">
+            <div class="av" style="background:#FEF2F3;color:#B91C1C">FT</div>
+            <div class="who"><b>Fernanda Tavares</b><span>Rafael sinalizou risco</span></div>
+            <button class="mini-b">Marcar</button>
+          </div>
+          <div class="row">
+            <div class="av" style="background:#FFFBEB;color:#D97706">GS</div>
+            <div class="who"><b>Gustavo Souza</b><span>última: 6 dias atrás</span></div>
+            <button class="mini-b">Marcar</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- VISTA DIA (mobile) -->
+    <div class="card day">
+      <div class="dh">
+        <b>Terça, 14 de julho</b>
+        <span style="font-size:11.5px;color:var(--muted)">6 aulas</span>
+      </div>
+      <div class="dr rafael">
+        <div class="hr">07:00</div>
+        <div class="bx"><b>Eduardo Rocha</b><span>Rafael · Peito e tríceps</span><br><span class="chip ok">Realizada</span></div>
+      </div>
+      <div class="dr rafael">
+        <div class="hr">08:00</div>
+        <div class="bx"><b>Daniela Martins</b><span>Rafael · Costas e bíceps</span><br><span class="chip ok">Realizada</span></div>
+      </div>
+      <div class="dr">
+        <div class="hr">10:00</div>
+        <div class="fr"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Livre · Rafael</div>
+      </div>
+      <div class="dr bruna">
+        <div class="hr">12:00</div>
+        <div class="bx"><b>Lucas Brandão</b><span>Bruna · Pernas completo</span><br><span class="chip conf">Confirmada</span></div>
+      </div>
+      <div class="dr bruna">
+        <div class="hr">18:00</div>
+        <div class="bx"><b>Camila Duarte</b><span>Bruna · Ombros e abdômen</span><br><span class="chip conf">Confirmada</span></div>
+      </div>
+      <div class="dr diego">
+        <div class="hr">19:00</div>
+        <div class="bx"><b>Marcelo Silva</b><span>Diego · Peito e tríceps</span><br><span class="chip wait">Aguarda confirmação</span></div>
+      </div>
+      <div class="dr diego">
+        <div class="hr">20:00</div>
+        <div class="bx"><b>Rafaela Antunes</b><span>Diego · Pernas completo</span><br><span class="chip wait">Aguarda confirmação</span></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<nav class="bnav">
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+  <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Alunos</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Mais</a>
+</nav>
+</body>
+</html>

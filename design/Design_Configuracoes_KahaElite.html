@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaha Elite · Configurações</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F5;--card:#FFFFFF;--ink:#0A0A0C;--ink-2:#3F3F46;--muted:#71717A;--muted-2:#A1A1AA;
+  --line:#E7E7EA;--line-2:#F1F1F3;
+  --red:#E11D2E;--red-2:#FF3D4D;--red-soft:#FEF2F3;
+  --ok:#15A34A;--ok-soft:#F0FDF4;--warn:#D97706;--warn-soft:#FFFBEB;--risk:#B91C1C;
+  --blue:#2563EB;--blue-soft:#EFF6FF;--zap:#25D366;
+  --r:16px;
+}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh;padding:14px;gap:14px}
+
+/* SIDEBAR */
+.side{width:236px;flex:none;background:var(--ink);border-radius:20px;padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:14px;height:calc(100vh - 28px)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px}
+.brand .k{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-family:'Archivo';font-weight:900;font-style:italic;font-size:18px}
+.brand b{color:#fff;font-family:'Archivo';font-weight:800;font-style:italic;font-size:15px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand span{display:block;color:#8A8A93;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.nav-t{color:#5E5E68;font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:14px 8px 8px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px;border-radius:10px;color:#A8A8B2;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px}
+.nav a svg{width:17px;height:17px;flex:none;opacity:.85}
+.nav a:hover{background:#17171B;color:#E6E6EA}
+.nav a.on{background:var(--red);color:#fff;font-weight:600}
+.nav .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px}
+.nav a.on .badge{background:#fff;color:var(--red)}
+.side .foot{margin-top:auto;border-top:1px solid #1E1E24;padding-top:14px;display:flex;align-items:center;gap:10px}
+.side .foot .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#7A0F19);display:grid;place-items:center;color:#fff;font-size:11.5px;font-weight:700}
+.side .foot b{color:#EDEDF0;font-size:12.5px;display:block;line-height:1.3}
+.side .foot span{color:#6C6C76;font-size:10.5px}
+
+/* TOPO */
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.top .h{flex:1;min-width:180px}
+.top h1{font-family:'Archivo';font-weight:800;font-style:italic;font-size:22px;text-transform:uppercase;line-height:1.1}
+.top h1 em{color:var(--red);font-style:italic}
+.top p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.btn{background:var(--red);color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.btn.ghost{background:var(--card);color:var(--ink-2);border:1px solid var(--line)}
+
+.wrap{display:grid;grid-template-columns:216px 1fr;gap:14px;align-items:start}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-width:0}
+.card.pad{padding:18px}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;height:20px;margin-bottom:14px;flex:none}
+.card-h h3{font-size:13px;font-weight:700;line-height:20px}
+.card-h .act{font-size:11.5px;color:var(--muted);font-weight:500;line-height:20px}
+
+/* SUBNAV */
+.snav{position:sticky;top:14px;padding:10px}
+.snav a{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;font-size:12.5px;font-weight:500;color:var(--ink-2);text-decoration:none;margin-bottom:2px}
+.snav a svg{width:15px;height:15px;color:var(--muted-2);flex:none}
+.snav a:hover{background:#FCFCFD}
+.snav a.on{background:var(--red-soft);color:var(--red);font-weight:600}
+.snav a.on svg{color:var(--red)}
+
+.col{display:flex;flex-direction:column;gap:14px}
+.sec-l{font-size:10px;font-weight:700;letter-spacing:.11em;text-transform:uppercase;color:var(--muted-2);padding:2px 0 0 2px}
+
+/* CONCIERGE (espelho do v4) */
+.kv{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.kv:last-child{border:none}
+.kv .k{font-size:12px;color:var(--muted);flex:none}
+.kv .v{font-size:12.5px;font-weight:600;text-align:right}
+.kv input{border:1px solid transparent;background:none;text-align:right;font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink);padding:5px 8px;border-radius:7px;outline:none;max-width:280px;width:100%}
+.kv input:hover{border-color:var(--line);background:#FCFCFD}
+.kv input:focus{border-color:var(--red);background:var(--card)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.ch{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:5px 11px;font-size:11.5px;font-weight:600;color:var(--ink-2);cursor:pointer}
+.ch.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.st-chip{font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px}
+.st-chip.ok{background:var(--ok-soft);color:var(--ok)}
+.st-chip.wait{background:var(--warn-soft);color:var(--warn)}
+
+/* PADRÃO DE MENSAGEM */
+.tpl{border:1px solid var(--line);border-radius:13px;margin-bottom:9px;overflow:hidden}
+.tpl:last-child{margin:0}
+.tpl-h{display:flex;align-items:center;gap:11px;padding:12px 13px;cursor:pointer}
+.tpl-h .ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;flex:none;background:var(--s);color:var(--c)}
+.tpl-h .ico svg{width:15px;height:15px}
+.tpl-h .tt{flex:1;min-width:0}
+.tpl-h .tt b{font-size:12.5px;font-weight:600;display:block}
+.tpl-h .tt span{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;margin-top:2px}
+.tpl-h .cv{color:var(--muted-2);flex:none}
+.tpl.open{border-color:var(--red)}
+.tpl.open .tpl-h{border-bottom:1px solid var(--line-2)}
+.tpl-b{padding:13px}
+.tpl-b textarea{width:100%;border:1px solid var(--line);border-radius:10px;padding:11px;font-family:inherit;font-size:12.5px;line-height:1.6;color:var(--ink);outline:none;resize:vertical;min-height:84px;background:#FCFCFD}
+.tpl-b textarea:focus{border-color:var(--red);background:var(--card)}
+.vars{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:9px}
+.vars .l{font-size:10.5px;color:var(--muted-2);font-weight:600;margin-right:2px}
+.v-ch{background:var(--red-soft);border:1px solid #FBD5D8;color:var(--red);border-radius:6px;padding:3px 7px;font-size:10.5px;font-weight:600;cursor:pointer;font-family:ui-monospace,monospace}
+.v-ch:hover{background:var(--red);color:#fff}
+.prev{margin-top:12px;background:#FAFAFB;border:1px solid var(--line);border-radius:11px;padding:11px}
+.prev .pl{font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.prev .pl svg{width:11px;height:11px}
+.bub{background:var(--ink);color:#fff;border-radius:12px;border-bottom-left-radius:4px;padding:10px 12px;font-size:12.5px;line-height:1.55;max-width:88%}
+.bub em{font-style:normal;background:rgba(225,29,46,.22);border-radius:3px;padding:0 3px}
+
+/* MOVIMENTOS (espelho do v4) */
+.mv{display:flex;align-items:flex-start;gap:14px;padding:14px 0;border-top:1px solid var(--line-2)}
+.mv.first{border-top:none;padding-top:0}
+.mv .mt{flex:1;min-width:0}
+.mv .mt .t{font-size:12.5px;font-weight:600;margin-bottom:3px}
+.mv .mt .s{font-size:11.5px;color:var(--muted);line-height:1.5}
+.tg{width:38px;height:22px;border-radius:20px;background:var(--line);border:none;cursor:pointer;position:relative;flex:none;transition:background .15s;margin-top:2px}
+.tg::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform .15s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tg.on{background:var(--red)}
+.tg.on::after{transform:translateX(16px)}
+
+/* REGRAS */
+.rg{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+.rg .kv{border-bottom:1px solid var(--line-2)}
+
+/* FAQ */
+.faq{border:1px solid var(--line);border-radius:11px;padding:11px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start}
+.faq .q{flex:1}
+.faq .q b{font-size:12px;font-weight:600;display:block;margin-bottom:3px}
+.faq .q span{font-size:11.5px;color:var(--muted);line-height:1.5}
+.faq .x{background:none;border:none;color:var(--muted-2);cursor:pointer;flex:none;padding:2px}
+.add{width:100%;border:1px dashed var(--line);background:none;border-radius:11px;padding:11px;font-size:12px;font-weight:600;color:var(--muted);font-family:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px}
+.add:hover{border-color:var(--red);color:var(--red)}
+
+.note{background:var(--warn-soft);border:1px solid #FDE68A;border-radius:11px;padding:11px 12px;display:flex;gap:9px;align-items:flex-start;margin-top:12px}
+.note svg{width:15px;height:15px;color:var(--warn);flex:none;margin-top:1px}
+.note div{font-size:11.5px;color:#78350F;line-height:1.5}
+
+.bnav{display:none}
+@media(max-width:1000px){ .wrap{grid-template-columns:1fr} .snav{position:static;display:flex;gap:4px;overflow-x:auto} .snav a{white-space:nowrap} .rg{grid-template-columns:1fr} }
+@media(max-width:900px){
+  .app{padding:0;gap:0}
+  .side{display:none}
+  .main{padding:14px 14px 86px}
+  .top h1{font-size:19px}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--ink);padding:9px 6px calc(9px + env(safe-area-inset-bottom));z-index:9}
+  .bnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#7C7C86;text-decoration:none;font-size:9.5px;font-weight:600;padding:5px 0}
+  .bnav a svg{width:19px;height:19px}
+  .bnav a.on{color:#fff}
+  .bnav a.on svg{color:var(--red-2)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="side">
+    <div class="brand"><div class="k">K</div><div><b>CT Kaha</b><span>Elite</span></div></div>
+    <div class="nav-t">Menu</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Alunos<span class="badge">22</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Professores</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas<span class="badge">8</span></a>
+    </nav>
+    <div class="nav-t">Geral</div>
+    <nav class="nav">
+      <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configurações</a>
+    </nav>
+    <div class="foot"><div class="av">JC</div><div><b>Gestor Kaha</b><span>elite@ctkaha.com.br</span></div></div>
+  </aside>
+
+  <main class="main">
+    <div class="top">
+      <div class="h">
+        <h1>Configura<em>ções</em></h1>
+        <p>A voz da Julia, o que ela faz e as regras da casa. Tudo daqui.</p>
+      </div>
+      <button class="btn ghost">Descartar</button>
+      <button class="btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg>
+        Salvar alterações
+      </button>
+    </div>
+
+    <div class="wrap">
+
+      <!-- SUBNAV -->
+      <div class="card snav">
+        <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>A Julia</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></svg>Padrão de mensagem</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>Movimentos</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Regras da sessão</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg>A academia</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Acesso</a>
+      </div>
+
+      <div class="col">
+
+        <!-- A JULIA -->
+        <div class="sec-l">A Julia</div>
+        <div class="card pad">
+          <div class="card-h"><h3>Concierge do Elite</h3><span class="act">22 alunos · 4 professores</span></div>
+          <div class="kv"><span class="k">Nome</span><input value="Julia"></div>
+          <div class="kv"><span class="k">Como se apresenta</span><input value="Julia, do time Kaha Elite"></div>
+          <div class="kv"><span class="k">Saudação da casa</span><input value="Bora, monstro!" placeholder="ex: e aí, campeão?"></div>
+          <div class="kv">
+            <span class="k">Tom</span>
+            <div class="chips">
+              <span class="ch on">Próximo e descontraído</span>
+              <span class="ch">Energia de treino</span>
+              <span class="ch">Premium e sóbrio</span>
+            </div>
+          </div>
+          <div class="kv">
+            <span class="k">Emoji</span>
+            <div class="chips">
+              <span class="ch">À vontade</span>
+              <span class="ch on">Com moderação</span>
+              <span class="ch">Quase nenhum</span>
+            </div>
+          </div>
+          <div class="kv"><span class="k">Nunca fazer ou parecer</span><input value="Insistente, formal demais, forçar venda"></div>
+          <div class="kv">
+            <span class="k">Número do Elite</span>
+            <div style="display:flex;align-items:center;gap:9px">
+              <input value="+55 11 99300-0000" style="max-width:150px">
+              <span class="st-chip wait">Aguardando conexão</span>
+            </div>
+          </div>
+          <div class="kv"><span class="k">Janela de envio</span><input value="08:00 às 20:00 · sem domingo" style="max-width:220px"></div>
+        </div>
+
+        <!-- PADRÃO DE MENSAGEM -->
+        <div class="sec-l">Padrão de mensagem</div>
+        <div class="card pad">
+          <div class="card-h">
+            <h3>Como a Julia escreve</h3>
+            <span class="act">Escreva do jeito da Kaha — o preview usa dados reais</span>
+          </div>
+
+          <!-- ABERTO -->
+          <div class="tpl open" style="--c:#2563EB;--s:#EFF6FF">
+            <div class="tpl-h">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg></div>
+              <div class="tt"><b>Pré-treino</b><span>No dia da sessão · cita o treino e a última carga</span></div>
+              <svg class="cv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m18 15-6-6-6 6"/></svg>
+            </div>
+            <div class="tpl-b">
+              <textarea>Bora, monstro! Hoje é {treino_do_dia} com {professor} 💪 Na última você mandou {ultima_carga} — bora passar disso hoje. Come bem antes e chega com sede de treino!</textarea>
+              <div class="vars">
+                <span class="l">Toque para inserir:</span>
+                <span class="v-ch">{nome}</span>
+                <span class="v-ch">{treino_do_dia}</span>
+                <span class="v-ch">{ultima_carga}</span>
+                <span class="v-ch">{professor}</span>
+                <span class="v-ch">{hora}</span>
+              </div>
+              <div class="prev">
+                <div class="pl">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                  Como fica com a Camila, hoje
+                </div>
+                <div class="bub">Bora, monstro! Hoje é <em>ombros e abdômen</em> com a <em>Bruna</em> 💪 Na última você mandou <em>14kg no desenvolvimento</em> — bora passar disso hoje. Come bem antes e chega com sede de treino!</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- FECHADOS -->
+          <div class="tpl" style="--c:#D97706;--s:#FFFBEB">
+            <div class="tpl-h">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg></div>
+              <div class="tt"><b>Confirmação</b><span>“Oi {nome}! Sua sessão é {dia} às {hora} com {professor}. Tá de pé?”</span></div>
+              <svg class="cv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="tpl" style="--c:#15A34A;--s:#F0FDF4">
+            <div class="tpl-h">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 2 3 7h7l-5.5 4.5L18 21l-6-4-6 4 1.5-7.5L2 9h7z"/></svg></div>
+              <div class="tt"><b>Pós-treino</b><span>“E aí {nome}, como foi hoje? Conta rapidinho pra gente: {link_q}”</span></div>
+              <svg class="cv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="tpl" style="--c:#E11D2E;--s:#FEF2F3">
+            <div class="tpl-h">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+              <div class="tt"><b>Resgate</b><span>“{nome}, sumido! Seu {treino_do_dia} tá esperando. {horarios_livres}”</span></div>
+              <svg class="cv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="tpl" style="--c:#7C3AED;--s:#F5F3FF">
+            <div class="tpl-h">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21.2l7.8-7.7 1.1-1.1a5.5 5.5 0 0 0 0-7.8z"/></svg></div>
+              <div class="tt"><b>Presença</b><span>“{nome}, dica do dia: nos dias sem treino, caprichar na proteína...”</span></div>
+              <svg class="cv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="tpl" style="--c:#71717A;--s:#F4F4F5">
+            <div class="tpl-h">
+              <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
+              <div class="tt"><b>Renovação</b><span>“{nome}, seu Elite renova em {dias_para_vencer} dias. Esse mês você...”</span></div>
+              <svg class="cv" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+          </div>
+
+          <div class="note">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+            <div>A Julia sempre se apresenta como parte do time do Elite — nunca finge ser um professor. Toda mensagem passa por você antes de sair.</div>
+          </div>
+        </div>
+
+        <!-- MOVIMENTOS (espelho do v4) -->
+        <div class="sec-l">Movimentos de relacionamento</div>
+        <div class="card pad">
+          <div class="card-h"><h3>O que a Julia faz pelo aluno</h3><span class="act">7 de 9 ligados</span></div>
+
+          <div class="mv first">
+            <div class="mt">
+              <div class="t">Escolha do professor pelo aluno</div>
+              <div class="s">Julia apresenta os professores com horários livres e o aluno escolhe com quem quer treinar. Fim do “chega e pega quem estiver disponível”.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Agendamento da sessão semanal</div>
+              <div class="s">Início da semana: Julia procura o aluno, marca dia e hora e define qual professor atende.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Confirmação no dia</div>
+              <div class="s">Horas antes: confirma horário e professor. Sem furo, sem chegar e pegar quem estiver livre.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Mensagem pré-treino</div>
+              <div class="s">No dia: cita o treino da ficha e a carga da última sessão. É o toque que faz o aluno sentir que alguém acompanha.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Check-in pós-sessão (aluno)</div>
+              <div class="s">Como foi o treino, os exercícios e as cargas? A resposta cai direto no painel e vira histórico.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Questionário pós-treino (professor)</div>
+              <div class="s">Ao concluir a sessão, o professor responde empenho, evolução, dor e risco de cancelamento. Vira a visão do professor na ficha.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Presença entre sessões</div>
+              <div class="s">Nos dias sem treino: dica do professor, check-in, motivação. É aqui que uma hora por semana vira presença a semana inteira.</div>
+            </div>
+            <button class="tg on"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Resgate de semana</div>
+              <div class="s">Quinta-feira sem sessão marcada: Julia corre atrás com os horários livres na mão. Semana que passa não volta.</div>
+            </div>
+            <button class="tg"></button>
+          </div>
+
+          <div class="mv">
+            <div class="mt">
+              <div class="t">Lembrete de renovação</div>
+              <div class="s">7 dias antes do vencimento — com o histórico de uso do mês na mão.</div>
+            </div>
+            <button class="tg"></button>
+          </div>
+        </div>
+
+        <!-- REGRAS DA SESSÃO -->
+        <div class="sec-l">Regras da sessão</div>
+        <div class="card pad">
+          <div class="card-h"><h3>Como funciona o Elite</h3><span class="act">A Julia obedece essas regras</span></div>
+          <div class="rg">
+            <div class="kv">
+              <span class="k">Duração</span>
+              <div class="chips"><span class="ch">30 min</span><span class="ch">45 min</span><span class="ch on">60 min</span></div>
+            </div>
+            <div class="kv"><span class="k">Sessões por semana</span><input value="1 por aluno" style="max-width:140px"></div>
+            <div class="kv"><span class="k">Antecedência p/ marcar</span><input value="até 2h antes" style="max-width:140px"></div>
+            <div class="kv"><span class="k">Prazo p/ cancelar</span><input value="até 6h antes" style="max-width:140px"></div>
+            <div class="kv">
+              <span class="k">Sessão extra</span>
+              <div class="chips"><span class="ch on">Se houver vaga</span><span class="ch">Não</span></div>
+            </div>
+            <div class="kv">
+              <span class="k">Dois alunos no mesmo horário</span>
+              <div class="chips"><span class="ch">Sim</span><span class="ch on">Não</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- A ACADEMIA -->
+        <div class="sec-l">A academia</div>
+        <div class="card pad">
+          <div class="card-h"><h3>O que a Julia sabe responder</h3><span class="act">3 perguntas cadastradas</span></div>
+          <div class="kv"><span class="k">Nome do plano</span><input value="Kaha Elite" style="max-width:180px"></div>
+          <div class="kv"><span class="k">Funcionamento</span><input value="Seg a sex 6h–22h · sáb 8h–12h" style="max-width:250px"></div>
+          <div class="kv" style="border-bottom:none;padding-bottom:6px"><span class="k">Orgulho da casa</span><input value="Estrutura 24h, atletas da casa, acompanhamento de verdade"></div>
+
+          <div style="margin:12px 0 9px" class="sec-l">Perguntas frequentes</div>
+          <div class="faq">
+            <div class="q"><b>Que horas abre?</b><span>Seg a sex das 6h às 22h, sábado até meio-dia. Domingo fechado.</span></div>
+            <button class="x"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+          </div>
+          <div class="faq">
+            <div class="q"><b>Tem estacionamento?</b><span>Sim, gratuito para alunos, na frente da unidade.</span></div>
+            <button class="x"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+          </div>
+          <div class="faq">
+            <div class="q"><b>Posso levar acompanhante?</b><span>Day-use mediante agendamento na recepção.</span></div>
+            <button class="x"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+          </div>
+          <button class="add"><svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Adicionar pergunta</button>
+
+          <div style="margin:16px 0 9px" class="sec-l">Sempre chamar uma pessoa</div>
+          <div class="kv"><span class="k">Queixa de dor ou lesão</span><button class="tg on" style="margin:0"></button></div>
+          <div class="kv"><span class="k">Reclamação</span><button class="tg on" style="margin:0"></button></div>
+          <div class="kv"><span class="k">Pedido de cancelamento</span><button class="tg on" style="margin:0"></button></div>
+          <div class="kv"><span class="k">Assunto de valores</span><button class="tg on" style="margin:0"></button></div>
+          <div class="kv"><span class="k">Se perguntarem de valores, a Julia diz</span><input value="Melhor falar com a recepção — quer que eu avise?"></div>
+          <div class="kv"><span class="k">Chamar quem</span><input value="Gestor Kaha · (11) 98800-1122" style="max-width:240px"></div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<nav class="bnav">
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Alunos</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas</a>
+  <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Mais</a>
+</nav>
+</body>
+</html>

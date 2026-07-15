@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kaha Elite · Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,600;0,700;0,800;1,800;1,900&family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#F4F4F5;--card:#FFFFFF;--ink:#0A0A0C;--ink-2:#3F3F46;--muted:#71717A;--muted-2:#A1A1AA;
+  --line:#E7E7EA;--line-2:#F1F1F3;
+  --red:#E11D2E;--red-2:#FF3D4D;--red-soft:#FEF2F3;
+  --ok:#15A34A;--ok-soft:#F0FDF4;--warn:#D97706;--warn-soft:#FFFBEB;--risk:#B91C1C;
+  --blue:#2563EB;--blue-soft:#EFF6FF;
+  --r:16px;--r-sm:10px;
+}
+body{background:var(--bg);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.app{display:flex;min-height:100vh;padding:14px;gap:14px}
+
+/* ============ SIDEBAR ============ */
+.side{width:236px;flex:none;background:var(--ink);border-radius:20px;padding:22px 16px;display:flex;flex-direction:column;position:sticky;top:14px;height:calc(100vh - 28px)}
+.brand{display:flex;align-items:center;gap:10px;padding:0 6px 22px}
+.brand .k{width:34px;height:34px;border-radius:9px;background:var(--red);display:grid;place-items:center;color:#fff;font-family:'Archivo';font-weight:900;font-style:italic;font-size:18px}
+.brand b{color:#fff;font-family:'Archivo';font-weight:800;font-style:italic;font-size:15px;letter-spacing:.02em;text-transform:uppercase;line-height:1}
+.brand span{display:block;color:#8A8A93;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;margin-top:3px}
+.nav-t{color:#5E5E68;font-size:9.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:14px 8px 8px}
+.nav a{display:flex;align-items:center;gap:11px;padding:10px 10px;border-radius:10px;color:#A8A8B2;font-size:13.5px;font-weight:500;text-decoration:none;margin-bottom:2px}
+.nav a svg{width:17px;height:17px;flex:none;opacity:.85}
+.nav a:hover{background:#17171B;color:#E6E6EA}
+.nav a.on{background:var(--red);color:#fff;font-weight:600}
+.nav a.on svg{opacity:1}
+.nav .badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:20px}
+.nav a.on .badge{background:#fff;color:var(--red)}
+.side .foot{margin-top:auto;border-top:1px solid #1E1E24;padding-top:14px;display:flex;align-items:center;gap:10px}
+.side .foot .av{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--red),#7A0F19);display:grid;place-items:center;color:#fff;font-size:11.5px;font-weight:700}
+.side .foot b{color:#EDEDF0;font-size:12.5px;display:block;line-height:1.3}
+.side .foot span{color:#6C6C76;font-size:10.5px}
+
+/* ============ MAIN ============ */
+.main{flex:1;min-width:0}
+.top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+.top .h{flex:1;min-width:0}
+.top h1{font-family:'Archivo';font-weight:800;font-style:italic;font-size:22px;text-transform:uppercase;letter-spacing:-.01em;line-height:1.1}
+.top p{color:var(--muted);font-size:12.5px;margin-top:3px}
+.search{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;width:230px}
+.search input{border:none;outline:none;font-size:12.5px;font-family:inherit;width:100%;color:var(--ink)}
+.search input::placeholder{color:var(--muted-2)}
+.btn{background:var(--ink);color:#fff;border:none;border-radius:10px;padding:10px 15px;font-size:12.5px;font-weight:600;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap}
+.btn.red{background:var(--red)}
+.btn.ghost{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.pill{display:flex;align-items:center;gap:7px;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:500;color:var(--ink-2);cursor:pointer}
+
+.grid{display:grid;grid-template-columns:1fr 1fr 1fr 300px;gap:14px;align-items:stretch}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;height:20px;margin-bottom:14px;flex:none}
+.card-h h3{font-size:13px;font-weight:700;letter-spacing:.005em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:20px}
+.card-h a,.card-h .act{font-size:11.5px;color:var(--muted);text-decoration:none;font-weight:500;white-space:nowrap;flex:none;line-height:20px}
+.card-h a:hover{color:var(--red)}
+
+/* destaque (equivale ao card escuro da referência) */
+.hero{background:var(--ink);border-color:var(--ink);color:#fff;position:relative;overflow:hidden}
+.hero::after{content:'';position:absolute;width:170px;height:170px;background:radial-gradient(circle,rgba(225,29,46,.42),transparent 68%);right:-52px;top:-58px}
+.hero .card-h h3{color:#fff;position:relative}
+.hero .tag{display:inline-flex;align-items:center;gap:5px;background:rgba(225,29,46,.16);border:1px solid rgba(225,29,46,.34);color:#FF8A94;font-size:9.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:20px;position:relative;flex:none}
+.hero .n{font-family:'Archivo';font-weight:900;font-style:italic;font-size:34px;line-height:1;margin:0 0 6px;letter-spacing:-.02em;position:relative}
+.hero .lb{color:#B4B4BD;font-size:12px;line-height:1.5;position:relative}
+.hero .lb b{color:#fff}
+.hero .cta{display:inline-flex;align-items:center;justify-content:center;gap:6px;margin-top:auto;padding-top:0;background:var(--red);color:#fff;border:none;border-radius:9px;padding:10px 13px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;position:relative}
+.hero .cta-wrap{margin-top:auto;padding-top:14px;position:relative}
+
+/* stat */
+.stat .n{font-family:'Archivo';font-weight:800;font-style:italic;font-size:34px;line-height:1;margin:0 0 8px;letter-spacing:-.02em}
+.stat .n small{font-size:17px;color:var(--muted-2);font-style:normal;font-weight:600}
+.delta{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600}
+.delta.up{color:var(--ok)}.delta.dn{color:var(--risk)}
+.delta span{color:var(--muted);font-weight:400}
+
+/* donut */
+.rail{grid-row:span 2}
+.donut{position:relative;width:186px;height:186px;margin:0 auto}
+.donut svg{transform:rotate(-90deg)}
+.donut .mid{position:absolute;inset:0;display:grid;place-content:center;text-align:center}
+.donut .mid small{color:var(--muted);font-size:10.5px;display:block;letter-spacing:.04em}
+.donut .mid b{font-family:'Archivo';font-style:italic;font-weight:900;font-size:28px;line-height:1.1}
+.legend{display:flex;flex-direction:column;gap:9px;margin-top:16px}
+.legend div{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2)}
+.legend i{width:9px;height:9px;border-radius:3px;flex:none}
+.legend b{margin-left:auto;font-weight:600}
+.rail .note{background:var(--red-soft);border:1px solid #FBD5D8;border-radius:12px;padding:12px;margin-top:auto;font-size:11.5px;color:#7F1D1D;line-height:1.5}
+
+/* agenda */
+.ag{flex:1;min-height:0;overflow:auto}
+.row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line-2)}
+.row:last-child{border:none}
+.hr{font-family:'Archivo';font-style:italic;font-weight:800;font-size:14px;width:46px;flex:none}
+.av{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:700;flex:none;background:#F1F1F3;color:var(--ink-2)}
+.row .who{flex:1;min-width:0}
+.row .who b{font-size:13px;font-weight:600;display:block}
+.row .who span{font-size:11.5px;color:var(--muted)}
+.chip{font-size:10.5px;font-weight:700;padding:4px 8px;border-radius:20px;white-space:nowrap}
+.chip.ok{background:var(--ok-soft);color:var(--ok)}
+.chip.conf{background:var(--blue-soft);color:var(--blue)}
+.chip.wait{background:var(--warn-soft);color:var(--warn)}
+.chip.risk{background:var(--red-soft);color:var(--risk)}
+
+/* barras */
+.bars{display:flex;align-items:flex-end;gap:10px;flex:1;min-height:132px;padding-top:4px}
+.bars .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:6px;height:100%}
+.bars .b i{display:block;background:#F1F1F3;border-radius:5px 5px 0 0}
+.bars .b i.f{background:var(--ink)}
+.bars .b.now i.f{background:var(--red)}
+.bars .b em{font-style:normal;font-size:10.5px;color:var(--muted);text-align:center}
+.bars .b.now em{color:var(--red);font-weight:700}
+
+/* atenção */
+.att .row{padding:12px 0}
+.att .why{font-size:11px;color:var(--risk);background:var(--red-soft);padding:2px 7px;border-radius:6px;display:inline-block;margin-top:3px}
+.mini{background:var(--ink);color:#fff;border:none;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;white-space:nowrap}
+
+/* alerta (queixa de dor) */
+.alert{display:flex;align-items:center;gap:10px;background:var(--warn-soft);border:1px solid #FDE68A;border-radius:12px;padding:11px 12px;margin-bottom:14px}
+.alert>svg{flex:none;color:#D97706}
+.alert .tx{flex:1;font-size:12px;color:#92400E;line-height:1.45}
+.alert .tx b{color:#78350F}
+.alert button{background:#D97706;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;flex:none}
+.foot-stat{display:flex;align-items:center;gap:11px;border-top:1px solid var(--line-2);margin-top:auto;padding-top:13px}
+.foot-stat .fs-n{font-family:'Archivo';font-style:italic;font-weight:900;font-size:21px;line-height:1}
+.foot-stat .fs-l{font-size:11.5px;color:var(--muted);line-height:1.4}
+.evo-d{font-size:11.5px;color:var(--muted)}
+.evo-d s{color:var(--muted-2);text-decoration:line-through}
+.evo-d b{color:var(--ok);font-weight:700}
+
+/* professores */
+.pb{display:flex;align-items:center;gap:11px;margin-bottom:13px}
+.pb:last-child{margin:0}
+.pb .nm{width:74px;font-size:12.5px;font-weight:600;flex:none}
+.pb .tr{flex:1;height:9px;background:#F1F1F3;border-radius:20px;overflow:hidden}
+.pb .tr i{display:block;height:100%;border-radius:20px;background:var(--ink)}
+.pb .tr i.r{background:var(--red)}
+.pb .vl{font-size:11.5px;color:var(--muted);width:56px;text-align:right;flex:none}
+
+/* julia */
+.julia{background:linear-gradient(160deg,#151519,#0A0A0C);border-color:var(--ink);color:#fff;position:relative;overflow:hidden}
+.julia::after{content:'';position:absolute;width:150px;height:150px;background:radial-gradient(circle,rgba(225,29,46,.3),transparent 70%);right:-40px;bottom:-56px}
+.julia .card-h h3{color:#fff;position:relative}
+.julia .card-h .act{color:#6C6C76;position:relative}
+.julia h4{font-family:'Archivo';font-style:italic;font-weight:900;font-size:17px;line-height:1.25;position:relative}
+.julia h4 em{color:var(--red-2);font-style:italic}
+.julia p{color:#A8A8B2;font-size:11.5px;line-height:1.55;margin:8px 0 0;position:relative}
+.julia .cta{width:100%;background:var(--red);color:#fff;border:none;border-radius:9px;padding:11px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;position:relative;margin-top:auto}
+.julia .cta-wrap{margin-top:auto;padding-top:14px;position:relative}
+
+.bnav{display:none}
+@media(max-width:1180px){
+  .grid{grid-template-columns:1fr 1fr}
+  .rail{grid-row:auto;grid-column:span 2}
+  .donut{margin:6px auto}
+}
+@media(max-width:860px){
+  .app{padding:0;gap:0}
+  .side{display:none}
+  .main{padding:14px 14px 86px}
+  .grid{grid-template-columns:1fr}
+  .rail{grid-column:auto}
+  .top{flex-wrap:wrap}
+  .search{width:100%;order:3}
+  .top h1{font-size:19px}
+  .bnav{display:flex;position:fixed;left:0;right:0;bottom:0;background:var(--ink);padding:9px 6px calc(9px + env(safe-area-inset-bottom));z-index:9}
+  .bnav a{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;color:#7C7C86;text-decoration:none;font-size:9.5px;font-weight:600;padding:5px 0}
+  .bnav a svg{width:19px;height:19px}
+  .bnav a.on{color:#fff}
+  .bnav a.on svg{color:var(--red-2)}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- SIDEBAR -->
+  <aside class="side">
+    <div class="brand">
+      <div class="k">K</div>
+      <div><b>CT Kaha</b><span>Elite</span></div>
+    </div>
+    <div class="nav-t">Menu</div>
+    <nav class="nav">
+      <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/></svg>Alunos<span class="badge">22</span></a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Professores</a>
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas<span class="badge">8</span></a>
+    </nav>
+    <div class="nav-t">Geral</div>
+    <nav class="nav">
+      <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Configurações</a>
+    </nav>
+    <div class="foot">
+      <div class="av">JC</div>
+      <div><b>Gestor Kaha</b><span>elite@ctkaha.com.br</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="top">
+      <div class="h">
+        <h1>Dashboard</h1>
+        <p>A semana do Elite, aluno por aluno.</p>
+      </div>
+      <div class="search">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#A1A1AA" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <input placeholder="Buscar aluno, professor...">
+      </div>
+      <div class="pill">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+        Semana de 14 jul
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+      </div>
+      <button class="btn red">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+        Marcar sessão
+      </button>
+    </div>
+
+    <div class="grid">
+
+      <!-- HERO: o que precisa de você -->
+      <div class="card hero">
+        <div class="card-h">
+          <h3>Precisa de você</h3>
+          <span class="tag"><svg viewBox="0 0 24 24" width="9" height="9" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>Urgente</span>
+        </div>
+        <div class="n">3</div>
+        <div class="lb">alunos <b>sem sessão</b> nesta semana<br>a semana fecha em <b>4 dias</b></div>
+        <div class="cta-wrap">
+          <button class="cta">Resolver agora
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- STAT 1 -->
+      <div class="card stat">
+        <div class="card-h"><h3>Sessões da semana</h3><span class="act">•••</span></div>
+        <div class="n">14<small>/22</small></div>
+        <div class="delta up">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          +3 <span>vs. semana passada</span>
+        </div>
+      </div>
+
+      <!-- STAT 2 -->
+      <div class="card stat">
+        <div class="card-h"><h3>Alunos em risco</h3><span class="act">•••</span></div>
+        <div class="n">2</div>
+        <div class="delta dn">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 7l10 10M17 9v8H9"/></svg>
+          2 semanas <span>sem treinar o mais frio</span>
+        </div>
+      </div>
+
+      <!-- RAIL: donut -->
+      <div class="card rail">
+        <div class="card-h"><h3>A semana do Elite</h3><span class="act">22 alunos</span></div>
+        <div class="donut">
+          <svg width="186" height="186" viewBox="0 0 186 186">
+            <circle cx="93" cy="93" r="72" fill="none" stroke="#F1F1F3" stroke-width="20"/>
+            <!-- 14/22 realizadas = 63.6% -->
+            <circle cx="93" cy="93" r="72" fill="none" stroke="#0A0A0C" stroke-width="20" stroke-linecap="round"
+              stroke-dasharray="287.8 452.4" />
+            <!-- 5/22 marcadas = 22.7% -->
+            <circle cx="93" cy="93" r="72" fill="none" stroke="#E11D2E" stroke-width="20" stroke-linecap="round"
+              stroke-dasharray="102.8 452.4" stroke-dashoffset="-292.8" />
+          </svg>
+          <div class="mid"><small>USO</small><b>64%</b></div>
+        </div>
+        <div class="legend">
+          <div><i style="background:#0A0A0C"></i>Sessões realizadas <b>14</b></div>
+          <div><i style="background:#E11D2E"></i>Marcadas p/ acontecer <b>5</b></div>
+          <div><i style="background:#E7E7EA"></i>Ainda sem sessão <b>3</b></div>
+        </div>
+        <div class="note"><b>Semana que passa não volta.</b> Três alunos ainda não marcaram — e a semana fecha domingo.</div>
+      </div>
+
+      <!-- AGENDA DE HOJE -->
+      <div class="card" style="grid-column:span 2">
+        <div class="card-h">
+          <h3>Aulas de hoje · terça</h3>
+          <a href="#">Ver agenda completa →</a>
+        </div>
+        <div class="ag">
+          <div class="row">
+            <div class="hr">07:00</div><div class="av">ER</div>
+            <div class="who"><b>Eduardo Rocha</b><span>com Rafael · Peito e tríceps</span></div>
+            <span class="chip ok">Realizada</span>
+          </div>
+          <div class="row">
+            <div class="hr">08:00</div><div class="av">DM</div>
+            <div class="who"><b>Daniela Martins</b><span>com Rafael · Costas e bíceps</span></div>
+            <span class="chip ok">Realizada</span>
+          </div>
+          <div class="row">
+            <div class="hr">12:00</div><div class="av">LB</div>
+            <div class="who"><b>Lucas Brandão</b><span>com Bruna · Pernas completo</span></div>
+            <span class="chip conf">Confirmada</span>
+          </div>
+          <div class="row">
+            <div class="hr">18:00</div><div class="av">CD</div>
+            <div class="who"><b>Camila Duarte</b><span>com Bruna · Ombros e abdômen</span></div>
+            <span class="chip conf">Confirmada</span>
+          </div>
+          <div class="row">
+            <div class="hr">19:00</div><div class="av">MS</div>
+            <div class="who"><b>Marcelo Silva</b><span>com Diego · Peito e tríceps</span></div>
+            <span class="chip wait">Aguarda confirmação</span>
+          </div>
+          <div class="row">
+            <div class="hr">20:00</div><div class="av">RA</div>
+            <div class="who"><b>Rafaela Antunes</b><span>com Diego · Pernas completo</span></div>
+            <span class="chip wait">Aguarda confirmação</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- ATENÇÃO -->
+      <div class="card att">
+        <div class="card-h"><h3>Precisa de atenção</h3><a href="#">Ver todos →</a></div>
+        <div class="row">
+          <div class="av" style="background:#FEF2F3;color:#B91C1C">JP</div>
+          <div class="who"><b>Julio Prado</b><div class="why">2 semanas sem treinar</div></div>
+          <button class="mini">Marcar</button>
+        </div>
+        <div class="row">
+          <div class="av" style="background:#FEF2F3;color:#B91C1C">FT</div>
+          <div class="who"><b>Fernanda Tavares</b><div class="why">Rafael sinalizou risco</div></div>
+          <button class="mini">Marcar</button>
+        </div>
+        <div class="row">
+          <div class="av" style="background:#FFFBEB;color:#D97706">GS</div>
+          <div class="who"><b>Gustavo Souza</b><div class="why" style="background:#FFFBEB;color:#D97706">Nota 2 no último treino</div></div>
+          <button class="mini">Marcar</button>
+        </div>
+        <div class="row">
+          <div class="av" style="background:#FFFBEB;color:#D97706">PC</div>
+          <div class="who"><b>Paula Correia</b><div class="why" style="background:#FFFBEB;color:#D97706">Renova em 5 dias</div></div>
+          <button class="mini">Falar</button>
+        </div>
+      </div>
+
+      <!-- O QUE OS PROFESSORES RELATARAM -->
+      <div class="card" style="grid-column:span 2">
+        <div class="card-h"><h3>O que os professores relataram</h3><a href="#">Ver tudo →</a></div>
+
+        <div class="alert">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+          <div class="tx"><b>Queixa de dor · Marcelo Silva</b><br>Reclamou do joelho no leg press — relatado por Diego, ontem às 19h</div>
+          <button>Ver</button>
+        </div>
+
+        <div class="row">
+          <div class="av" style="background:#FEF2F3;color:#B91C1C">FT</div>
+          <div class="who"><b>Fernanda Tavares</b><span>Rafael: “desanimada, faltou às duas últimas”</span></div>
+          <span class="chip risk">Risco: sim</span>
+        </div>
+        <div class="row">
+          <div class="av" style="background:#FFFBEB;color:#D97706">GS</div>
+          <div class="who"><b>Gustavo Souza</b><span>Bruna: “manteve carga, mas sem gás”</span></div>
+          <span class="chip wait">Risco: talvez</span>
+        </div>
+        <div class="row">
+          <div class="av">ER</div>
+          <div class="who"><b>Eduardo Rocha</b><span>Rafael: “evoluiu bem, muito empenhado”</span></div>
+          <span class="chip ok">Evoluiu</span>
+        </div>
+
+        <div class="foot-stat">
+          <div class="fs-n">4,2</div>
+          <div class="fs-l">empenho médio dado pelos professores<br><span style="color:var(--ok);font-weight:600">+0,2 vs. semana passada</span></div>
+        </div>
+      </div>
+
+      <!-- EVOLUÇÕES DA SEMANA -->
+      <div class="card">
+        <div class="card-h"><h3>Evoluções da semana</h3><span class="act">4 destaques</span></div>
+        <div class="row">
+          <div class="av" style="background:#F0FDF4;color:#15A34A">ER</div>
+          <div class="who"><b>Eduardo Rocha</b><div class="evo-d">Supino <s>40kg</s> <b>44kg</b></div></div>
+          <span class="chip ok">PR ↑</span>
+        </div>
+        <div class="row">
+          <div class="av" style="background:#F0FDF4;color:#15A34A">CD</div>
+          <div class="who"><b>Camila Duarte</b><div class="evo-d">Agachamento <s>55kg</s> <b>60kg</b></div></div>
+          <span class="chip ok">PR ↑</span>
+        </div>
+        <div class="row">
+          <div class="av">LB</div>
+          <div class="who"><b>Lucas Brandão</b><div class="evo-d">Voltou depois de 12 dias sumido</div></div>
+          <span class="chip conf">Voltou</span>
+        </div>
+        <div class="row">
+          <div class="av">DM</div>
+          <div class="who"><b>Daniela Martins</b><div class="evo-d">4 semanas seguidas treinando</div></div>
+          <span class="chip conf">Sequência</span>
+        </div>
+        <div class="foot-stat" style="gap:8px">
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="#E11D2E" stroke-width="2" style="flex:none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <div class="fs-l">Bom material pra Julia reconhecer hoje.</div>
+        </div>
+      </div>
+
+      <!-- MOVIMENTO -->
+      <div class="card" style="grid-column:span 2">
+        <div class="card-h">
+          <h3>Sessões realizadas por semana</h3>
+          <a href="#">Últimas 8 semanas</a>
+        </div>
+        <div class="bars">
+          <div class="b"><i class="f" style="height:52%"></i><em>19/5</em></div>
+          <div class="b"><i class="f" style="height:60%"></i><em>26/5</em></div>
+          <div class="b"><i class="f" style="height:48%"></i><em>2/6</em></div>
+          <div class="b"><i class="f" style="height:66%"></i><em>9/6</em></div>
+          <div class="b"><i class="f" style="height:72%"></i><em>16/6</em></div>
+          <div class="b"><i class="f" style="height:60%"></i><em>23/6</em></div>
+          <div class="b"><i class="f" style="height:82%"></i><em>30/6</em></div>
+          <div class="b"><i class="f" style="height:76%"></i><em>7/7</em></div>
+          <div class="b now"><i class="f" style="height:64%"></i><em>14/7</em></div>
+        </div>
+      </div>
+
+      <!-- JULIA -->
+      <div class="card julia">
+        <div class="card-h">
+          <h3>Julia · concierge</h3>
+          <span class="act">Hoje</span>
+        </div>
+        <h4>8 mensagens<br>prontas pra <em>hoje</em></h4>
+        <p>2 confirmações, 4 pré-treinos e 2 alunos pra chamar de volta. Revise e envie em um toque.</p>
+        <div class="cta-wrap">
+          <button class="cta">Abrir conversas</button>
+        </div>
+      </div>
+
+      <!-- USO POR PROFESSOR -->
+      <div class="card" style="grid-column:span 2">
+        <div class="card-h"><h3>Alunos por professor · esta semana</h3><a href="#">Ver professores →</a></div>
+        <div class="pb"><div class="nm">Rafael</div><div class="tr"><i style="width:82%"></i></div><div class="vl">9 aulas</div></div>
+        <div class="pb"><div class="nm">Bruna</div><div class="tr"><i style="width:64%"></i></div><div class="vl">7 aulas</div></div>
+        <div class="pb"><div class="nm">Diego</div><div class="tr"><i style="width:45%"></i></div><div class="vl">5 aulas</div></div>
+        <div class="pb"><div class="nm">Lucas</div><div class="tr"><i class="r" style="width:18%"></i></div><div class="vl">2 aulas</div></div>
+      </div>
+
+      <!-- SATISFAÇÃO -->
+      <div class="card stat">
+        <div class="card-h"><h3>Como os alunos avaliaram</h3><span class="act">11 respostas</span></div>
+        <div class="n">4,6<small>/5</small></div>
+        <div class="delta up" style="margin-bottom:16px">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17 17 7M9 7h8v8"/></svg>
+          +0,3 <span>vs. semana passada</span>
+        </div>
+        <div class="pb"><div class="nm" style="width:20px">5</div><div class="tr"><i style="width:73%"></i></div><div class="vl">8</div></div>
+        <div class="pb"><div class="nm" style="width:20px">4</div><div class="tr"><i style="width:18%"></i></div><div class="vl">2</div></div>
+        <div class="pb"><div class="nm" style="width:20px">3</div><div class="tr"><i style="width:0%"></i></div><div class="vl">0</div></div>
+        <div class="pb"><div class="nm" style="width:20px">2</div><div class="tr"><i class="r" style="width:9%"></i></div><div class="vl">1</div></div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- BOTTOM NAV (mobile) -->
+<nav class="bnav">
+  <a href="#" class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>Dashboard</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Agenda</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Alunos</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>Conversas</a>
+  <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>Mais</a>
+</nav>
+</body>
+</html>
