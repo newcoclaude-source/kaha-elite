@@ -48,7 +48,9 @@ function AlunoForm({
   const [whatsapp, setWhatsapp] = useState(aluno?.telefone ?? "");
   const [objetivo, setObjetivo] = useState(aluno?.objetivo ?? "");
   const [vencimento, setVencimento] = useState(aluno?.vencimento ?? "");
-  const [valor, setValor] = useState(
+  // valor_mensal continua no payload (preserva o valor no banco), mas NÃO é
+  // exibido: regra "nada financeiro na UI".
+  const [valor] = useState(
     aluno?.valor_mensal != null ? String(aluno.valor_mensal) : "1000",
   );
   const [erro, setErro] = useState<string | null>(null);
@@ -120,26 +122,14 @@ function AlunoForm({
             />
           </Campo>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Campo label="Vencimento">
-              <input
-                type="date"
-                value={vencimento ?? ""}
-                onChange={(e) => setVencimento(e.target.value)}
-                className="input"
-              />
-            </Campo>
-            <Campo label="Valor mensal">
-              <input
-                type="number"
-                inputMode="numeric"
-                value={valor}
-                onChange={(e) => setValor(e.target.value)}
-                placeholder="1000"
-                className="input"
-              />
-            </Campo>
-          </div>
+          <Campo label="Vencimento">
+            <input
+              type="date"
+              value={vencimento ?? ""}
+              onChange={(e) => setVencimento(e.target.value)}
+              className="input"
+            />
+          </Campo>
 
           {erro && <p className="text-sm text-risk">{erro}</p>}
         </div>

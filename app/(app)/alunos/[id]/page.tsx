@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { obterAluno } from "@/lib/kaha/alunos";
 import { ultimaCargaPorExercicio } from "@/lib/kaha/cargas";
-import { diasPara, formatarData, formatBRL, iniciais, STATUS } from "@/lib/kaha/ui";
+import { diasPara, formatarData, iniciais, STATUS } from "@/lib/kaha/ui";
 import {
   DesativarAlunoButton,
   EditarAlunoButton,
@@ -97,7 +97,6 @@ export default async function AlunoPage({
             {aluno.objetivo || <span className="text-muted-2">—</span>}
           </Linha>
           <Linha rotulo="Renova">{renovaEm(aluno.vencimento)}</Linha>
-          <Linha rotulo="Valor">{formatBRL(aluno.valor_mensal)}/mês</Linha>
         </dl>
       </section>
 
