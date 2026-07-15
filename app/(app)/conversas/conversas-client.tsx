@@ -20,6 +20,7 @@ const CHIP: Record<FilaTipo, string> = {
   resgate: "bg-red-soft text-risk",
   renovacao: "bg-line-2 text-muted",
   presenca: "bg-line-2 text-muted",
+  aviso_professor: "bg-[#EDE9FE] text-[#7C3AED]",
 };
 const AV: Record<string, string> = {
   verde: "bg-ok-soft text-ok",
@@ -271,7 +272,16 @@ export function ConversasClient({ itens }: { itens: FilaItem[] }) {
                     rows={3}
                     className="w-full resize-none rounded-lg border border-white/10 bg-white/5 p-2.5 text-[12.5px] leading-relaxed text-[#D4D4D8] outline-none focus:border-white/25"
                   />
-                  <div className="mt-2.5 flex gap-2">
+                  <p className="mt-2 flex items-center gap-1.5 text-[11px] text-white/55">
+                    <Icon
+                      name={sel.destinatario === "professor" ? "professores" : "alunos"}
+                      className="h-3 w-3"
+                    />
+                    Vai para o WhatsApp{" "}
+                    {sel.destinatario === "professor" ? "do professor " : "de "}
+                    <b className="text-white/80">{sel.destinatario_nome}</b>
+                  </p>
+                  <div className="mt-2 flex gap-2">
                     <button
                       type="button"
                       onClick={() => enviar(sel)}

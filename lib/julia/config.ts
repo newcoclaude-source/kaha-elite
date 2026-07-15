@@ -7,7 +7,8 @@ export type MovimentoChave =
   | "pos_treino"
   | "presenca"
   | "renovacao"
-  | "resgate";
+  | "resgate"
+  | "aviso_professor";
 
 // Hoje: todos os movimentos ligados. D5 lê de kaha_movimentos.
 export function movimentoAtivo(_chave: MovimentoChave): boolean {

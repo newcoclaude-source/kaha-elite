@@ -45,7 +45,9 @@ export type MensagemHistorico = {
 export type FilaItem = {
   aluno_id: string;
   aluno_nome: string;
-  telefone: string | null;
+  telefone: string | null; // do DESTINATÁRIO (aluno ou professor)
+  destinatario: "aluno" | "professor";
+  destinatario_nome: string;
   objetivo: string | null;
   tipo: FilaTipo;
   mensagem: string;
@@ -55,6 +57,7 @@ export type FilaItem = {
 };
 
 const PRIORIDADE: Record<FilaTipo, number> = {
+  aviso_professor: 0,
   confirmacao: 1,
   pre_treino: 1,
   pos_treino: 2,
@@ -144,7 +147,7 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     supabase
       .from("kaha_sessoes")
       .select(
-        "id, aluno_id, estado, dia_semana, hora, feedback_token, professor:kaha_professores(nome)",
+        "id, aluno_id, estado, dia_semana, hora, feedback_token, professor:kaha_professores(nome, telefone)",
       )
       .eq("semana_ref", semana)
       .neq("estado", "cancelada"),
@@ -221,7 +224,9 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
   // Mensagens: histórico por aluno + última data (para presença 3+ dias).
   const msgMap = new Map<string, MensagemHistorico[]>();
   const ultimaMsg = new Map<string, string>();
-  const enviadosHoje = new Set<string>(); // já receberam mensagem hoje → fora da fila
+  // "Já falei com ele hoje" — separado por eixo: aluno vs aviso ao professor.
+  const enviadosHojeAluno = new Set<string>();
+  const avisoEnviadoHoje = new Set<string>();
   for (const m of mensagensRes.data ?? []) {
     if (!m.aluno_id) continue;
     const arr = msgMap.get(m.aluno_id) ?? [];
@@ -229,7 +234,8 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     msgMap.set(m.aluno_id, arr);
     if (!ultimaMsg.has(m.aluno_id)) ultimaMsg.set(m.aluno_id, m.created_at);
     if (m.status === "enviada" && m.created_at >= inicioHoje) {
-      enviadosHoje.add(m.aluno_id);
+      if (m.tipo === "aviso_professor") avisoEnviadoHoje.add(m.aluno_id);
+      else enviadosHojeAluno.add(m.aluno_id);
     }
   }
 
@@ -272,6 +278,8 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
       aluno_id: alunoId,
       aluno_nome: aluno.nome,
       telefone: aluno.telefone,
+      destinatario: "aluno",
+      destinatario_nome: aluno.nome,
       objetivo: aluno.objetivo,
       tipo,
       mensagem: renderTemplate(tpl, { nome: primeiroNome(aluno.nome), ...vars }),
@@ -281,19 +289,69 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     };
   }
 
+  // Aviso ao professor — mensagem para o TELEFONE DO PROFESSOR sobre a aula de hoje.
+  function novoAviso(
+    alunoId: string,
+    prof: { nome: string; telefone: string | null },
+    vars: Record<string, string | null | undefined>,
+    sessaoId: string,
+  ): FilaItem | null {
+    const aluno = (alunosRes.data ?? []).find((a) => a.id === alunoId);
+    const tpl = T.get("aviso_professor");
+    if (!aluno || !tpl) return null;
+    return {
+      aluno_id: alunoId,
+      aluno_nome: aluno.nome,
+      telefone: prof.telefone,
+      destinatario: "professor",
+      destinatario_nome: prof.nome,
+      objetivo: aluno.objetivo,
+      tipo: "aviso_professor",
+      mensagem: renderTemplate(tpl, vars),
+      sessao_id: sessaoId,
+      contexto: contextoDe(alunoId),
+      historico: [],
+    };
+  }
+
   const candidatos: FilaItem[] = [];
+  const avisos: FilaItem[] = [];
 
   // ── Derivados de sessões de HOJE ──
   for (const s of sessoesRes.data ?? []) {
     if (s.dia_semana !== hoje || !s.aluno_id) continue;
     const ctx = fichaMap.get(s.aluno_id)?.treino ?? "seu treino";
-    const prof =
-      um<{ nome: string }>(s.professor as Um<{ nome: string }>)?.nome ??
-      "seu professor";
+    const profObj = um<{ nome: string; telefone: string | null }>(
+      s.professor as Um<{ nome: string; telefone: string | null }>,
+    );
+    const prof = profObj?.nome ?? "seu professor";
     const carga = cargaMap.get(s.aluno_id);
     const cargaTxt = carga
       ? `${carga.peso}kg no ${carga.exercicio.toLowerCase()}`
       : "um bom peso";
+    const aluno = (alunosRes.data ?? []).find((a) => a.id === s.aluno_id);
+
+    // Aviso ao professor sobre a aula de hoje (agendada/confirmada).
+    if (
+      (s.estado === "agendada" || s.estado === "confirmada") &&
+      profObj?.telefone &&
+      aluno &&
+      movimentoAtivo("aviso_professor")
+    ) {
+      const it = novoAviso(
+        s.aluno_id,
+        profObj,
+        {
+          professor: primeiroNome(profObj.nome),
+          aluno: primeiroNome(aluno.nome),
+          hora: normHora(s.hora),
+          treino_do_dia: ctx,
+          ultima_carga: cargaTxt,
+        },
+        s.id,
+      );
+      if (it) avisos.push(it);
+    }
 
     if (s.estado === "agendada" && movimentoAtivo("confirmacao")) {
       const it = novoItem(
@@ -358,17 +416,22 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     }
   }
 
-  // ── Dedupe: 1 item por aluno, maior prioridade (menor número) ──
+  // ── Dedupe dos itens ao ALUNO: 1 por aluno, maior prioridade (menor número) ──
   const porAluno = new Map<string, FilaItem>();
   for (const it of candidatos) {
-    if (enviadosHoje.has(it.aluno_id)) continue; // já falou com ele hoje
+    if (enviadosHojeAluno.has(it.aluno_id)) continue; // já falou com ele hoje
     const atual = porAluno.get(it.aluno_id);
     if (!atual || PRIORIDADE[it.tipo] < PRIORIDADE[atual.tipo]) {
       porAluno.set(it.aluno_id, it);
     }
   }
 
-  return [...porAluno.values()].sort(
-    (a, b) => PRIORIDADE[a.tipo] - PRIORIDADE[b.tipo] || a.aluno_nome.localeCompare(b.aluno_nome),
+  // Avisos ao professor: eixo próprio (1 por aula), fora do dedupe do aluno.
+  const avisosFinais = avisos.filter((a) => !avisoEnviadoHoje.has(a.aluno_id));
+
+  return [...porAluno.values(), ...avisosFinais].sort(
+    (a, b) =>
+      PRIORIDADE[a.tipo] - PRIORIDADE[b.tipo] ||
+      a.aluno_nome.localeCompare(b.aluno_nome),
   );
 }

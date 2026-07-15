@@ -8,7 +8,8 @@ export type FilaTipo =
   | "pos_treino"
   | "resgate"
   | "renovacao"
-  | "presenca";
+  | "presenca"
+  | "aviso_professor";
 
 export const ROTULO_TIPO: Record<FilaTipo, string> = {
   confirmacao: "Confirmação",
@@ -17,7 +18,11 @@ export const ROTULO_TIPO: Record<FilaTipo, string> = {
   resgate: "Resgate",
   renovacao: "Renovação",
   presenca: "Presença",
+  aviso_professor: "Aviso ao professor",
 };
+
+// Para quem vai a mensagem (o número usado no wa.me).
+export type Destinatario = "aluno" | "professor";
 
 // Substitui {chave} pelos valores; o que faltar cai no fallback já preenchido
 // pelo motor (nunca deixa {placeholder} cru numa mensagem pronta pra enviar).
