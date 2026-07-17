@@ -51,6 +51,18 @@ export async function updateSession(request: NextRequest) {
     url.pathname = "/login";
     return NextResponse.redirect(url);
   }
+  if (user && protegida) {
+    // Onboarding não concluído → abre o wizard (dado em kaha_config).
+    const { data: cfg } = await supabase
+      .from("kaha_config")
+      .select("onboarding_concluido")
+      .maybeSingle();
+    if (cfg && !cfg.onboarding_concluido) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/setup";
+      return NextResponse.redirect(url);
+    }
+  }
   if (user && path === "/login") {
     const url = request.nextUrl.clone();
     url.pathname = "/agenda";
