@@ -72,6 +72,13 @@ function primeiroNome(nome: string): string {
   return nome.trim().split(/\s+/)[0] ?? nome;
 }
 
+// Flexão de gênero no resgate. Sem gênero → frase neutra (sem sumido/sumida).
+function generoChamada(genero: string | null | undefined): string {
+  if (genero === "m") return "sumido!";
+  if (genero === "f") return "sumida!";
+  return "saudade de você por aqui!";
+}
+
 function normHora(h: string): string {
   return h.slice(0, 5);
 }
@@ -138,7 +145,7 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     supabase.from("kaha_templates").select("tipo, conteudo"),
     supabase
       .from("kaha_alunos")
-      .select("id, nome, telefone, vencimento, objetivo, preferencias, entrou_em")
+      .select("id, nome, telefone, vencimento, objetivo, preferencias, entrou_em, genero")
       .eq("ativo", true),
     supabase
       .from("kaha_alunos_semaforo")
@@ -197,7 +204,7 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     const base = f.divisao || f.objetivo || null;
     const treino = base
       ? ex && ex.count > 0
-        ? `${base} · ${ex.count} ex.`
+        ? `${base} · ${ex.count} ${ex.count === 1 ? "exercício" : "exercícios"}`
         : base
       : null;
     if (!fichaMap.has(f.aluno_id)) fichaMap.set(f.aluno_id, { treino });
@@ -320,7 +327,7 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
   // ── Derivados de sessões de HOJE ──
   for (const s of sessoesRes.data ?? []) {
     if (s.dia_semana !== hoje || !s.aluno_id) continue;
-    const ctx = fichaMap.get(s.aluno_id)?.treino ?? "seu treino";
+    const ctx = fichaMap.get(s.aluno_id)?.treino ?? "treino";
     const profObj = um<{ nome: string; telefone: string | null }>(
       s.professor as Um<{ nome: string; telefone: string | null }>,
     );
@@ -346,7 +353,10 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
           aluno: primeiroNome(aluno.nome),
           hora: normHora(s.hora),
           treino_do_dia: ctx,
-          ultima_carga: cargaTxt,
+          // frase opcional: só quando há carga registrada (senão "" → some)
+          ultima_sessao: carga
+            ? `Última sessão dele: ${carga.peso}kg no ${carga.exercicio.toLowerCase()}. `
+            : "",
         },
         s.id,
       );
@@ -393,7 +403,7 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
 
   for (const aluno of alunosRes.data ?? []) {
     if (comSessao.has(aluno.id)) continue;
-    const treino = fichaMap.get(aluno.id)?.treino ?? "seu treino";
+    const treino = fichaMap.get(aluno.id)?.treino ?? "treino";
     const dias = diasPara(aluno.vencimento);
 
     if (dias != null && dias >= 0 && dias <= 7 && movimentoAtivo("renovacao")) {
@@ -404,7 +414,11 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
       const it = novoItem(
         aluno.id,
         "resgate",
-        { treino_do_dia: treino, horarios_livres: horTexto },
+        {
+          treino_do_dia: treino,
+          horarios_livres: horTexto,
+          chamada: generoChamada(aluno.genero),
+        },
         null,
       );
       if (it) candidatos.push(it);

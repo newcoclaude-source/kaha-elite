@@ -51,6 +51,39 @@ update kaha_alunos a set plano_id = p.id
   from kaha_planos p
  where a.seed and a.plano_id is null and p.seed and p.meta_semanal = a.meta_semanal;
 
+-- 4c) gênero + fichas (Fernanda e Julio SEM ficha — são os "em risco", coerente)
+update kaha_alunos set genero = m.g from (values
+  ('Eduardo Rocha','m'),('Daniela Martins','f'),('Camila Duarte','f'),('Lucas Brandão','m'),
+  ('Marcelo Silva','m'),('Rafaela Antunes','f'),('Julio Prado','m'),('Fernanda Tavares','f')
+) m(nome,g) where kaha_alunos.nome = m.nome and kaha_alunos.seed;
+
+insert into kaha_fichas (aluno_id, nome, ativa, objetivo, divisao)
+select a.id, d.divisao, true, a.objetivo, d.divisao
+from kaha_alunos a
+join (values
+  ('Eduardo Rocha','Peito e tríceps'),('Daniela Martins','Costas e bíceps'),
+  ('Camila Duarte','Pernas e glúteos'),('Lucas Brandão','Ombros e abdômen'),
+  ('Marcelo Silva','Full body'),('Rafaela Antunes','Glúteos e pernas')
+) d(nome,divisao) on d.nome = a.nome
+where a.seed;
+
+insert into kaha_ficha_exercicios (ficha_id, nome, biblioteca_id, ordem, series, reps_alvo)
+select f.id, x.nome, x.id, x.rn, 3, '10-12'
+from kaha_fichas f
+join kaha_alunos a on a.id = f.aluno_id and a.seed
+join lateral (
+  select b.id, b.nome, row_number() over (order by b.grupo, b.nome) as rn
+  from kaha_exercicios_biblioteca b
+  where b.ativo and b.grupo = any(case f.divisao
+    when 'Peito e tríceps' then array['Peito','Tríceps']
+    when 'Costas e bíceps' then array['Costas','Bíceps']
+    when 'Pernas e glúteos' then array['Pernas','Glúteos']
+    when 'Ombros e abdômen' then array['Ombros','Abdômen']
+    when 'Full body' then array['Peito','Costas','Pernas']
+    when 'Glúteos e pernas' then array['Glúteos','Pernas'] end)
+  order by b.grupo, b.nome limit 6
+) x on true;
+
 -- 5) histórico realizado (4 semanas anteriores, home slots distintos por aluno)
 with monday as (select date_trunc('week',(now() at time zone 'America/Sao_Paulo'))::date as wk),
 home(aluno,prof,dia,hora) as (values
