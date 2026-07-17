@@ -8,6 +8,7 @@ import { Icon } from "@/components/ui/icons";
 import { corProfessor } from "@/lib/kaha/cores";
 import { ESTADO_SESSAO, iniciais, type EstadoSessao } from "@/lib/kaha/ui";
 import type { DashboardData } from "@/lib/kaha/dashboard";
+import { OnboardingPendingCard } from "@/components/onboarding/pending-card";
 
 const CHIP: Record<EstadoSessao, string> = {
   realizada: "bg-ok-soft text-ok",
@@ -62,6 +63,8 @@ export function DashboardD8({
       </header>
 
       <div className="grid grid-cols-1 gap-3.5 md:grid-cols-2 xl:grid-cols-4">
+        {/* Onboarding pendente (some sozinho quando concluído) */}
+        <OnboardingPendingCard />
         {/* HERO — precisa de você */}
         <section className="relative flex flex-col overflow-hidden rounded-card border border-ink bg-ink p-[18px] text-white">
           <div className="pointer-events-none absolute -right-14 -top-14 h-44 w-44 rounded-full bg-[radial-gradient(circle,rgba(225,29,46,.42),transparent_68%)]" />
