@@ -16,6 +16,7 @@ delete from kaha_sessoes where aluno_id in (select id from kaha_alunos where see
 delete from kaha_horarios where professor_id in (select id from kaha_professores where seed);
 delete from kaha_alunos where seed;
 delete from kaha_professores where seed;
+delete from kaha_planos where seed;
 
 -- 2) professores
 insert into kaha_professores (nome, especialidade, telefone, ativo, seed) values
@@ -41,6 +42,14 @@ insert into kaha_alunos (nome, telefone, ativo, meta_semanal, objetivo, preferen
  ('Rafaela Antunes','5511971221994',true,3,'Emagrecimento',null,(now()-interval '2 months')::date,true),
  ('Julio Prado','5511971221994',true,3,'Hipertrofia',null,(now()-interval '7 months')::date,true),
  ('Fernanda Tavares','5511971221994',true,5,'Performance','Anda desanimada — puxar pela presença',(now()-interval '9 months')::date,true);
+
+-- 4b) planos (Convencional=3, Elite=5) + vínculo pela meta que o aluno tem
+insert into kaha_planos (nome, meta_semanal, seed)
+select v.nome, v.meta, true from (values ('Convencional',3),('Elite',5)) v(nome,meta)
+where not exists (select 1 from kaha_planos where seed);
+update kaha_alunos a set plano_id = p.id
+  from kaha_planos p
+ where a.seed and a.plano_id is null and p.seed and p.meta_semanal = a.meta_semanal;
 
 -- 5) histórico realizado (4 semanas anteriores, home slots distintos por aluno)
 with monday as (select date_trunc('week',(now() at time zone 'America/Sao_Paulo'))::date as wk),
@@ -79,5 +88,8 @@ from tw t
 join kaha_alunos a on a.nome=t.aluno
 join kaha_professores p on p.nome=t.prof
 cross join monday m;
+
+-- 7) ambiente demo é um ambiente CONCLUÍDO (o wizard não abre por cima do demo)
+update kaha_config set onboarding_concluido = true where id;
 
 commit;

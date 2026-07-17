@@ -40,5 +40,9 @@ delete from kaha_horarios
 
 delete from kaha_alunos      where seed;
 delete from kaha_professores where seed;
+delete from kaha_planos      where seed;
+
+-- reseta o estado do wizard para NÃO-concluído: o gestor vive o onboarding do zero
+update kaha_config set onboarding_concluido = false where id;
 
 commit;
