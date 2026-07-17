@@ -1,43 +1,42 @@
-import Link from "next/link";
-import { Icon } from "@/components/ui/icons";
+import { headers } from "next/headers";
+import { carregarDashboard } from "@/lib/kaha/dashboard";
+import { DashboardD8 } from "./dashboard-d8";
 
 export const dynamic = "force-dynamic";
 
-const ATALHOS = [
-  { href: "/agenda", icon: "sessoes" as const, label: "Agenda", desc: "Marcar e executar treinos" },
-  { href: "/alunos", icon: "alunos" as const, label: "Alunos", desc: "Fichas, cargas e semáforo" },
-  { href: "/professores", icon: "professores" as const, label: "Professores", desc: "Grade de horários" },
-];
+const TZ = "America/Sao_Paulo";
 
-export default function DashboardPage() {
+function hojeSP(): string {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: TZ,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+export default async function DashboardPage() {
+  const h = headers();
+  const host = h.get("host") ?? "localhost:3000";
+  const proto = h.get("x-forwarded-proto") ?? "http";
+  const data = await carregarDashboard(`${proto}://${host}`);
+
+  const hoje = hojeSP();
+  const d = new Date(hoje + "T12:00:00Z");
+  const hojeDia = d.getUTCDay();
+  const offset = hojeDia === 0 ? 6 : hojeDia - 1;
+  const diasParaFechar = 6 - offset;
+  const hojeLabel = d.toLocaleDateString("pt-BR", {
+    weekday: "long",
+    timeZone: "UTC",
+  });
+
   return (
-    <div className="mx-auto max-w-5xl px-5 py-8 lg:px-8">
-      <header className="mb-6">
-        <h1 className="title-brand text-4xl">
-          Dash<span className="text-brand">board</span>
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          O painel completo — números, atenção e feed — chega no próximo bloco.
-        </p>
-      </header>
-
-      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-        {ATALHOS.map((a) => (
-          <Link
-            key={a.href}
-            href={a.href}
-            className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5 transition-colors hover:border-muted-2"
-          >
-            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand/15 text-brand">
-              <Icon name={a.icon} className="h-5 w-5" />
-            </span>
-            <div className="min-w-0">
-              <p className="font-semibold text-text">{a.label}</p>
-              <p className="truncate text-xs text-muted">{a.desc}</p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </div>
+    <DashboardD8
+      data={data}
+      hojeDia={hojeDia}
+      hojeLabel={hojeLabel}
+      diasParaFechar={diasParaFechar}
+    />
   );
 }

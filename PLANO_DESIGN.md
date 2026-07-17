@@ -337,6 +337,22 @@ Sessões (histórico com estado, professor, nota do aluno, empenho do professor)
 Polish: empty states em toda tela, skeletons, toasts, varredura de vocabulário proibido
 E de conteúdo financeiro, revisão nos dois viewports.
 
+## D8 · Dashboard (ler `/design/Design_Dashboard_KahaElite.html`)
+A primeira tela do produto (entrada da demo). Todos os cards com número REAL do banco;
+onde não há dado, **empty state** (nunca "chega no próximo bloco").
+- Hero preto **"Precisa de você"**: nº de alunos sem sessão + "a semana fecha em N dias" → /agenda.
+- StatCards: **Sessões da semana (X / CAPACIDADE)** e **Alunos em risco**.
+- Donut **"A semana do Elite"**: realizadas / marcadas / capacidade livre.
+- **Aulas de hoje · {dia}**; **Precisa de atenção** (motivo por aluno, do semáforo);
+  **Sessões realizadas por semana** (8 semanas); card preto da **Julia** (N mensagens
+  prontas → /conversas); **Alunos por professor** (cor estável por professor); e os cards
+  de relatos/evoluções/avaliações (empty até haver feedbacks/cargas).
+- **CORREÇÃO (meta semanal):** `meta_semanal` por aluno (3 ou 5) via migration **0014**.
+  **Capacidade da semana = SOMA das metas**, não alunos×N. O semáforo de cada aluno é
+  relativo à meta DELE (proporção do alvo de 4 semanas; sem número cravado). A view
+  `kaha_alunos_semaforo` foi recriada com essa regra.
+**Aceite:** dashboard real, capacidade = soma das metas, empty states corretos, dois viewports.
+
 ---
 
 ## HIGIENE (pendências abertas desde o build — resolver até o D7)
