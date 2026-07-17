@@ -11,6 +11,7 @@ type Res = { ok: boolean; erro?: string };
 export async function salvarAcademia(dados: {
   nome: string;
   horarios: string;
+  whatsapp: string;
 }): Promise<Res> {
   const supabase = createClient();
   const { error } = await supabase
@@ -18,6 +19,7 @@ export async function salvarAcademia(dados: {
     .update({
       academia_nome: dados.nome.trim() || null,
       academia_horarios: dados.horarios.trim() || null,
+      numero_elite: dados.whatsapp.replace(/\D/g, "") || null,
     })
     .eq("id", true);
   if (error) return { ok: false, erro: error.message };
@@ -123,6 +125,81 @@ export async function concluirOnboarding(): Promise<Res> {
     .from("kaha_config")
     .update({ onboarding_concluido: true })
     .eq("id", true);
+  if (error) return { ok: false, erro: error.message };
+  revalidatePath("/setup");
+  return { ok: true };
+}
+
+// ── Passo 3.5 · Conhecimento da Julia (campos existentes de kaha_config + FAQ) ──
+
+export async function salvarJulia(dados: {
+  tom: string;
+  janela_inicio: string;
+  janela_fim: string;
+  resposta_valores: string;
+  prazo_cancelar: string;
+}): Promise<Res> {
+  const supabase = createClient();
+  const patch: Record<string, string | null> = {
+    tom: dados.tom || null,
+    resposta_valores: dados.resposta_valores.trim() || null,
+    prazo_cancelar: dados.prazo_cancelar.trim() || null,
+  };
+  if (dados.janela_inicio) patch.janela_inicio = dados.janela_inicio;
+  if (dados.janela_fim) patch.janela_fim = dados.janela_fim;
+  const { error } = await supabase.from("kaha_config").update(patch).eq("id", true);
+  if (error) return { ok: false, erro: error.message };
+  revalidatePath("/setup");
+  return { ok: true };
+}
+
+// Replace-all idempotente (FAQ é pequeno e do gestor).
+export async function salvarFaq(
+  itens: { pergunta: string; resposta: string }[],
+): Promise<Res> {
+  const supabase = createClient();
+  const { error: eDel } = await supabase.from("kaha_faq").delete().not("id", "is", null);
+  if (eDel) return { ok: false, erro: eDel.message };
+  const rows = itens
+    .filter((i) => i.pergunta.trim())
+    .map((i, ordem) => ({
+      pergunta: i.pergunta.trim(),
+      resposta: i.resposta.trim(),
+      ordem,
+    }));
+  if (rows.length) {
+    const { error } = await supabase.from("kaha_faq").insert(rows);
+    if (error) return { ok: false, erro: error.message };
+  }
+  revalidatePath("/setup");
+  return { ok: true };
+}
+
+// ── Passo 4 · Equipe (kaha_usuarios) — DADO, não controle de acesso ──
+
+export async function criarUsuario(dados: {
+  nome: string;
+  email: string;
+  perfil: "gerente" | "coordenador" | "professor";
+}): Promise<Res> {
+  const nome = dados.nome.trim();
+  if (!nome) return { ok: false, erro: "Dê um nome à pessoa." };
+  const supabase = createClient();
+  const { error } = await supabase.from("kaha_usuarios").insert({
+    nome,
+    email: dados.email.trim() || null,
+    perfil: dados.perfil,
+    convidado: false,
+    seed: false,
+  });
+  if (error) return { ok: false, erro: error.message };
+  revalidatePath("/setup");
+  return { ok: true };
+}
+
+export async function removerUsuario(id: string): Promise<Res> {
+  const supabase = createClient();
+  const { error } = await supabase.from("kaha_usuarios").delete().eq("id", id);
   if (error) return { ok: false, erro: error.message };
   revalidatePath("/setup");
   return { ok: true };
