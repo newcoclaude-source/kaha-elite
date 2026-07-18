@@ -353,9 +353,13 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
           aluno: primeiroNome(aluno.nome),
           hora: normHora(s.hora),
           treino_do_dia: ctx,
-          // frase opcional: só quando há carga registrada (senão "" → some)
+          // 2a (regra 6 — código na frente): {pronome} já vai pronto. O template do
+          // banco só passa a usar {pronome} depois do deploy (2b). Tolerante: enquanto
+          // o template disser "Ele" fixo, renderTemplate ignora {pronome} — nada quebra.
+          pronome: aluno.genero === "f" ? "Ela" : "Ele",
+          // frase opcional: só quando há carga (senão "" → some); flexiona dele/dela.
           ultima_sessao: carga
-            ? `Última sessão dele: ${carga.peso}kg no ${carga.exercicio.toLowerCase()}. `
+            ? `Última sessão d${aluno.genero === "f" ? "ela" : "ele"}: ${carga.peso}kg no ${carga.exercicio.toLowerCase()}. `
             : "",
         },
         s.id,
