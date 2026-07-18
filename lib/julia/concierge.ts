@@ -105,10 +105,18 @@ const TOOL = {
 const FALLBACK_ACAO =
   "Que ótimo que você quer isso! 🙌 Vou confirmar com a equipe e já te retorno com tudo certinho.";
 
+export type RespostaJulia = {
+  reply: string;
+  acao: { resumo: string } | null;
+  erro?: string;
+  status?: number; // status HTTP devolvido pela API (quando houver)
+  body?: string; // corpo do erro devolvido pela API (sem a key — só o erro)
+};
+
 export async function conversarComJulia(
   system: string,
   messages: ChatMsg[],
-): Promise<{ reply: string; acao: { resumo: string } | null; erro?: string }> {
+): Promise<RespostaJulia> {
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) return { reply: "", acao: null, erro: "ANTHROPIC_API_KEY ausente no ambiente." };
 
@@ -129,13 +137,21 @@ export async function conversarComJulia(
         messages: messages.map((m) => ({ role: m.role, content: m.content })),
       }),
     });
-  } catch {
-    return { reply: "", acao: null, erro: "Falha ao contatar o serviço de conversa." };
+  } catch (e) {
+    return { reply: "", acao: null, erro: `fetch falhou: ${(e as Error).message}` };
   }
 
   if (!resp.ok) {
+    // Corpo cru do erro da Anthropic (contém code/type/message). Nunca contém a
+    // key — ela só vai no header x-api-key da request, nunca na resposta.
     const detalhe = await resp.text().catch(() => "");
-    return { reply: "", acao: null, erro: `Anthropic ${resp.status}: ${detalhe.slice(0, 300)}` };
+    return {
+      reply: "",
+      acao: null,
+      erro: `Anthropic ${resp.status}`,
+      status: resp.status,
+      body: detalhe.slice(0, 800),
+    };
   }
 
   const data = (await resp.json()) as {

@@ -50,9 +50,16 @@ export async function POST(req: Request) {
   ]);
 
   const system = montarSystemPrompt((cfg ?? {}) as ConciergeConfig, faq ?? []);
-  const { reply, acao, erro } = await conversarComJulia(system, messages);
+  const { reply, acao, erro, status: apiStatus, body: apiBody } = await conversarComJulia(
+    system,
+    messages,
+  );
   if (erro) {
-    console.error("[julia] erro:", erro);
+    // Log de diagnóstico: status HTTP + corpo cru da API (NUNCA a key — ela só
+    // vai no header da request de saída). Aparece nos Runtime Logs da Vercel.
+    console.error(
+      `[julia] falha ao responder | erro=${erro} | anthropic_status=${apiStatus ?? "-"} | anthropic_body=${apiBody ?? "-"}`,
+    );
     return NextResponse.json({ erro: "A Julia não conseguiu responder agora." }, { status: 502 });
   }
 
