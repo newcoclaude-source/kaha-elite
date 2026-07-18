@@ -24,14 +24,16 @@ export const ROTULO_TIPO: Record<FilaTipo, string> = {
 // Para quem vai a mensagem (o número usado no wa.me).
 export type Destinatario = "aluno" | "professor";
 
-// Substitui {chave} pelos valores; o que faltar cai no fallback já preenchido
-// pelo motor (nunca deixa {placeholder} cru numa mensagem pronta pra enviar).
+// Substitui {chave} pelos valores. Var AUSENTE (null/undefined) deixa {placeholder}
+// cru — salvaguarda contra var esquecida. String vazia ("") é intencional (frase
+// opcional, ex.: {ultima_sessao}) e renderiza NADA. O motor sempre passa fallback
+// não-vazio para as vars obrigatórias.
 export function renderTemplate(
   conteudo: string,
   vars: Record<string, string | null | undefined>,
 ): string {
   return conteudo.replace(/\{(\w+)\}/g, (_m, chave) => {
     const v = vars[chave];
-    return v == null || v === "" ? `{${chave}}` : String(v);
+    return v == null ? `{${chave}}` : String(v);
   });
 }
