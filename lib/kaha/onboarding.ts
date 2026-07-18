@@ -20,6 +20,7 @@ export type SetupConfig = {
   academia_horarios: string | null;
   numero_elite: string | null;
   tom: string | null;
+  saudacao: string | null;
   janela_inicio: string | null;
   janela_fim: string | null;
   resposta_valores: string | null;
@@ -36,21 +37,12 @@ export type SetupData = {
   alunosCount: number;
 };
 
-// FAQ pré-carregado no passo 3.5 — o gestor só responde.
-export const FAQ_PADRAO: string[] = [
-  "Como funciona o valor do plano?",
-  "Qual o horário de funcionamento?",
-  "Abre aos sábados?",
-  "Tem estacionamento?",
-  "Como faço para cancelar ou remarcar?",
-  "Posso repor uma sessão que perdi?",
-];
-
 const CONFIG_VAZIA: SetupConfig = {
   academia_nome: null,
   academia_horarios: null,
   numero_elite: null,
   tom: null,
+  saudacao: null,
   janela_inicio: null,
   janela_fim: null,
   resposta_valores: null,
@@ -73,7 +65,7 @@ export async function carregarSetup(): Promise<SetupData> {
     supabase
       .from("kaha_config")
       .select(
-        "academia_nome, academia_horarios, numero_elite, tom, janela_inicio, janela_fim, resposta_valores, prazo_cancelar, onboarding_concluido",
+        "academia_nome, academia_horarios, numero_elite, tom, saudacao, janela_inicio, janela_fim, resposta_valores, prazo_cancelar, onboarding_concluido",
       )
       .maybeSingle(),
     supabase
@@ -100,11 +92,9 @@ export async function carregarSetup(): Promise<SetupData> {
       .eq("ativo", true),
   ]);
 
-  const faqExistente = (faqRows.data ?? []) as FaqItem[];
-  const faq: FaqItem[] =
-    faqExistente.length > 0
-      ? faqExistente
-      : FAQ_PADRAO.map((pergunta) => ({ id: null, pergunta, resposta: "" }));
+  // FAQ cru do banco (pergunta pode ter prefixo "limite:"/"escalacao:"); o
+  // componente do passo 3.5 parseia e pré-carrega as perguntas dos alunos.
+  const faq = (faqRows.data ?? []) as FaqItem[];
 
   return {
     config: (cfg.data as SetupConfig) ?? CONFIG_VAZIA,

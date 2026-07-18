@@ -134,6 +134,7 @@ export async function concluirOnboarding(): Promise<Res> {
 
 export async function salvarJulia(dados: {
   tom: string;
+  saudacao: string;
   janela_inicio: string;
   janela_fim: string;
   resposta_valores: string;
@@ -142,6 +143,7 @@ export async function salvarJulia(dados: {
   const supabase = createClient();
   const patch: Record<string, string | null> = {
     tom: dados.tom || null,
+    saudacao: dados.saudacao.trim() || null,
     resposta_valores: dados.resposta_valores.trim() || null,
     prazo_cancelar: dados.prazo_cancelar.trim() || null,
   };
