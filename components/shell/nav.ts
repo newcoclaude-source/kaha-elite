@@ -14,13 +14,14 @@ export const NAV: NavItem[] = [
   { key: "agenda", label: "Agenda", icon: "sessoes", href: "/agenda", grupo: "MENU" },
   { key: "alunos", label: "Alunos", icon: "alunos", href: "/alunos", grupo: "MENU" },
   { key: "conversas", label: "Conversas", icon: "conversas", href: "/conversas", grupo: "MENU" },
+  { key: "julia", label: "Julia", icon: "conversas", href: "/julia", grupo: "GERAL" },
   { key: "professores", label: "Professores", icon: "professores", href: "/professores", grupo: "GERAL" },
   { key: "configuracoes", label: "Configurações", icon: "config", href: "/configuracoes", grupo: "GERAL" },
 ];
 
 // Bottom nav (mobile): 4 fixos + "Mais".
 export const BOTTOM_KEYS = ["dashboard", "agenda", "alunos", "conversas"];
-export const MAIS_KEYS = ["professores", "configuracoes"];
+export const MAIS_KEYS = ["julia", "professores", "configuracoes"];
 
 export function itemPorKey(key: string): NavItem | undefined {
   return NAV.find((n) => n.key === key);

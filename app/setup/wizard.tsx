@@ -8,6 +8,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { PerfilEquipe, SetupData } from "@/lib/kaha/onboarding";
+import { JuliaChat } from "@/components/julia/julia-chat";
 import { ImportarAlunos } from "./import-alunos";
 import { PassoJulia } from "./passo-julia";
 import {
@@ -27,6 +28,7 @@ const PASSOS = [
   { label: "Importar alunos", obrig: true },
   { label: "Conhecimento da Julia", obrig: false },
   { label: "Professores e equipe", obrig: false },
+  { label: "Experimente a Julia", obrig: false },
 ] as const;
 
 const INPUT = "w-full rounded-[10px] border border-line px-3 py-2.5 text-sm outline-none focus:border-muted-2";
@@ -93,6 +95,17 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
         {passo === 2 && <ImportarAlunos planos={inicial.planos} />}
         {passo === 3 && <PassoJulia inicial={inicial} />}
         {passo === 4 && <PassoProfessoresEquipe inicial={inicial} />}
+        {passo === 5 && (
+          <div className="flex flex-col gap-3">
+            <p className="text-[13px] text-muted">
+              Pronto! Converse com a Julia como se fosse um aluno. Ela responde na hora — quem
+              executa é você e sua equipe.
+            </p>
+            <div className="h-[58vh]">
+              <JuliaChat />
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="mt-6 flex items-center gap-3 border-t border-line pt-4">
