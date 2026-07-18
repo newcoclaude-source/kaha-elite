@@ -73,5 +73,8 @@ export async function POST(req: Request) {
     if (error) console.error("[julia] falha ao registrar pendência:", error.message);
   }
 
+  // Log de sucesso (observabilidade): permite distinguir "respondeu" de "sem
+  // request" nos Runtime Logs. Sem conteúdo do aluno, só métricas.
+  console.log(`[julia] ok | pendencia=${!!acao} | chars=${reply.length}`);
   return NextResponse.json({ reply, pendencia: !!acao });
 }
