@@ -118,7 +118,18 @@ export async function conversarComJulia(
   messages: ChatMsg[],
 ): Promise<RespostaJulia> {
   const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) return { reply: "", acao: null, erro: "ANTHROPIC_API_KEY ausente no ambiente." };
+  if (!key) {
+    // Diagnóstico (só NOMES de variáveis, nunca valores): distingue erro de
+    // nome (typo/espaço) de erro de escopo (nenhuma var ANTHROP no ambiente).
+    const nomes = Object.keys(process.env).filter((k) => k.toUpperCase().includes("ANTHROP"));
+    return {
+      reply: "",
+      acao: null,
+      erro: "ANTHROPIC_API_KEY ausente no ambiente.",
+      body: `nomes_com_ANTHROP=[${nomes.join(" | ")}] typeof=${typeof process.env
+        .ANTHROPIC_API_KEY} len=${(process.env.ANTHROPIC_API_KEY ?? "").length}`,
+    };
+  }
 
   let resp: Response;
   try {
