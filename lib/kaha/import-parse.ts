@@ -8,6 +8,7 @@ export type Mapeamento = {
   nome: string; // chave da coluna do nome
   telefone: string | null;
   plano: string | null;
+  genero: string | null;
 };
 
 export type PlanoRef = { id: string; nome: string; meta_semanal: number };
@@ -17,6 +18,7 @@ export type LinhaValidada = {
   telefone: string | null;
   plano_id: string | null;
   plano_nome: string;
+  genero: "m" | "f" | null;
 };
 
 export type Problema = { linha: number; nome: string; motivo: string };
@@ -39,6 +41,15 @@ export function normalizarTelefone(v: unknown): { digits: string | null; valido:
   return { digits: d, valido };
 }
 
+// F/M, feminino/masculino, f/m → 'f'/'m'; vazio ou desconhecido → null.
+export function normalizarGenero(v: unknown): "m" | "f" | null {
+  const s = String(v ?? "").trim().toLowerCase();
+  if (!s) return null;
+  if (s.startsWith("f")) return "f";
+  if (s.startsWith("m")) return "m";
+  return null;
+}
+
 // Palpite automático de mapeamento a partir dos cabeçalhos.
 export function adivinharMapeamento(colunas: string[]): Mapeamento {
   const achar = (re: RegExp) => colunas.find((c) => re.test(c.trim())) ?? null;
@@ -46,6 +57,7 @@ export function adivinharMapeamento(colunas: string[]): Mapeamento {
     nome: achar(/nome|aluno|name/i) ?? colunas[0] ?? "",
     telefone: achar(/tel|fone|whats|celular|phone/i),
     plano: achar(/plano|plan/i),
+    genero: achar(/g[eê]nero|sexo|gender/i),
   };
 }
 
@@ -99,11 +111,21 @@ export function validarImport(
       avisos.push({ linha, nome, motivo: "Telefone inválido — será importado sem telefone" });
     }
 
+    // Gênero: sem gênero = VÁLIDO com aviso (mensagens usam frase neutra).
+    let genero: "m" | "f" | null = null;
+    if (map.genero) {
+      const rawGen = String(row[map.genero] ?? "").trim();
+      genero = normalizarGenero(rawGen);
+      if (!rawGen) avisos.push({ linha, nome, motivo: "Sem gênero — mensagens no neutro" });
+      else if (!genero) avisos.push({ linha, nome, motivo: "Gênero não reconhecido — neutro" });
+    }
+
     validas.push({
       nome,
       telefone: tel.valido ? tel.digits : null,
       plano_id,
       plano_nome,
+      genero,
     });
   });
 

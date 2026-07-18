@@ -25,6 +25,8 @@ export type SetupConfig = {
   janela_fim: string | null;
   resposta_valores: string | null;
   prazo_cancelar: string | null;
+  dias_resgate: number | null;
+  hora_confirmacao: string | null;
   onboarding_concluido: boolean;
 };
 
@@ -47,6 +49,8 @@ const CONFIG_VAZIA: SetupConfig = {
   janela_fim: null,
   resposta_valores: null,
   prazo_cancelar: null,
+  dias_resgate: null,
+  hora_confirmacao: null,
   onboarding_concluido: false,
 };
 
@@ -65,7 +69,7 @@ export async function carregarSetup(): Promise<SetupData> {
     supabase
       .from("kaha_config")
       .select(
-        "academia_nome, academia_horarios, numero_elite, tom, saudacao, janela_inicio, janela_fim, resposta_valores, prazo_cancelar, onboarding_concluido",
+        "academia_nome, academia_horarios, numero_elite, tom, saudacao, janela_inicio, janela_fim, resposta_valores, prazo_cancelar, dias_resgate, hora_confirmacao, onboarding_concluido",
       )
       .maybeSingle(),
     supabase

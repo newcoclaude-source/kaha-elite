@@ -64,6 +64,7 @@ export function ImportarAlunos({ planos }: { planos: Plano[] }) {
           nome: v.nome,
           telefone: v.telefone,
           plano_id: v.plano_id,
+          genero: v.genero,
         })),
       );
       if (r.ok) {
@@ -112,7 +113,7 @@ export function ImportarAlunos({ planos }: { planos: Plano[] }) {
           <p className="mb-2 text-[12px] font-semibold text-ink-2">
             De qual coluna vem cada campo?
           </p>
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <MapSelect
               label="Nome"
               value={map.nome}
@@ -132,6 +133,13 @@ export function ImportarAlunos({ planos }: { planos: Plano[] }) {
               colunas={colunas}
               opcional
               onChange={(v) => setMap({ ...map, plano: v })}
+            />
+            <MapSelect
+              label="Gênero"
+              value={map.genero}
+              colunas={colunas}
+              opcional
+              onChange={(v) => setMap({ ...map, genero: v })}
             />
           </div>
         </div>

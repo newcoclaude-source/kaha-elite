@@ -86,6 +86,7 @@ export type LinhaImport = {
   nome: string;
   telefone: string | null;
   plano_id: string | null;
+  genero: "m" | "f" | null;
 };
 
 // Importa em lote. meta_semanal = meta do plano (espelho p/ a capacidade do D8).
@@ -107,6 +108,7 @@ export async function importarAlunos(
       nome: l.nome.trim(),
       telefone: l.telefone?.trim() || null,
       plano_id: l.plano_id,
+      genero: l.genero,
       meta_semanal: l.plano_id ? (metaDoPlano.get(l.plano_id) ?? null) : null,
       ativo: true,
       seed: false,
@@ -139,9 +141,11 @@ export async function salvarJulia(dados: {
   janela_fim: string;
   resposta_valores: string;
   prazo_cancelar: string;
+  dias_resgate: number;
+  hora_confirmacao: string;
 }): Promise<Res> {
   const supabase = createClient();
-  const patch: Record<string, string | null> = {
+  const patch: Record<string, string | number | null> = {
     tom: dados.tom || null,
     saudacao: dados.saudacao.trim() || null,
     resposta_valores: dados.resposta_valores.trim() || null,
@@ -149,6 +153,8 @@ export async function salvarJulia(dados: {
   };
   if (dados.janela_inicio) patch.janela_inicio = dados.janela_inicio;
   if (dados.janela_fim) patch.janela_fim = dados.janela_fim;
+  if (dados.dias_resgate) patch.dias_resgate = dados.dias_resgate;
+  if (dados.hora_confirmacao) patch.hora_confirmacao = dados.hora_confirmacao;
   const { error } = await supabase.from("kaha_config").update(patch).eq("id", true);
   if (error) return { ok: false, erro: error.message };
   revalidatePath("/setup");

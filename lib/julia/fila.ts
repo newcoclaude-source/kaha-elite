@@ -141,6 +141,8 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
     cargasRes,
     mensagensRes,
     livres,
+    cfgRes,
+    ultimaRealizadaRes,
   ] = await Promise.all([
     supabase.from("kaha_templates").select("tipo, conteudo"),
     supabase
@@ -176,6 +178,12 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
       .select("aluno_id, tipo, conteudo, status, created_at")
       .order("created_at", { ascending: false }),
     horariosLivres(semana),
+    supabase.from("kaha_config").select("dias_resgate").maybeSingle(),
+    supabase
+      .from("kaha_sessoes")
+      .select("aluno_id, realizada_em")
+      .eq("estado", "realizada")
+      .not("realizada_em", "is", null),
   ]);
 
   const T = new Map<string, string>(
@@ -405,16 +413,30 @@ export async function montarFilaDoDia(origin: string): Promise<FilaItem[]> {
   const horTexto = horariosTexto(livres) || "alguns horários";
   const tresDiasAtras = new Date(Date.now() - 3 * 86_400_000).toISOString();
 
+  // Régua de presença (kaha_config.dias_resgate): a Julia só vai atrás do aluno
+  // depois de N dias sem treinar. Sem sessão realizada nunca → vai (Infinity).
+  const diasResgate = cfgRes.data?.dias_resgate ?? 10;
+  const ultimaRealizada = new Map<string, string>();
+  for (const s of ultimaRealizadaRes.data ?? []) {
+    if (!s.aluno_id || !s.realizada_em) continue;
+    const cur = ultimaRealizada.get(s.aluno_id);
+    if (!cur || s.realizada_em > cur) ultimaRealizada.set(s.aluno_id, s.realizada_em);
+  }
+
   for (const aluno of alunosRes.data ?? []) {
     if (comSessao.has(aluno.id)) continue;
     const treino = fichaMap.get(aluno.id)?.treino ?? "treino";
     const dias = diasPara(aluno.vencimento);
+    const ultTreino = ultimaRealizada.get(aluno.id);
+    const diasSemTreinar = ultTreino
+      ? Math.floor((Date.now() - new Date(ultTreino).getTime()) / 86_400_000)
+      : Infinity;
 
     if (dias != null && dias >= 0 && dias <= 7 && movimentoAtivo("renovacao")) {
       const it = novoItem(aluno.id, "renovacao", { dias_para_vencer: String(dias) }, null);
       if (it) candidatos.push(it);
     }
-    if (livres.length > 0 && movimentoAtivo("resgate")) {
+    if (livres.length > 0 && diasSemTreinar >= diasResgate && movimentoAtivo("resgate")) {
       const it = novoItem(
         aluno.id,
         "resgate",
