@@ -9,7 +9,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PerfilEquipe, SetupData } from "@/lib/kaha/onboarding";
-import { JuliaChat } from "@/components/julia/julia-chat";
+import { JuliaChat, type ChatMensagem } from "@/components/julia/julia-chat";
 import { ImportarAlunos } from "./import-alunos";
 import { PassoJulia } from "./passo-julia";
 import {
@@ -35,11 +35,22 @@ const PASSOS = [
 ] as const;
 
 const INPUT = "w-full rounded-[10px] border border-line px-3 py-2.5 text-sm outline-none focus:border-muted-2";
+const TIME_IN = "rounded-[10px] border border-line px-3 py-2.5 text-sm outline-none focus:border-muted-2";
+
+// Extrai HH:MM de abertura/fechamento. Formatos antigos em texto livre não casam
+// e voltam vazios — ok, o gestor repreenche no seletor nativo.
+function parseHorario(v: string | null): { abre: string; fecha: string } {
+  const m = (v ?? "").match(/(\d{1,2}:\d{2})\D+(\d{1,2}:\d{2})/);
+  return m
+    ? { abre: m[1].padStart(5, "0"), fecha: m[2].padStart(5, "0") }
+    : { abre: "", fecha: "" };
+}
 
 export function Wizard({ inicial, preview }: { inicial: SetupData; preview: boolean }) {
   const router = useRouter();
   const [passo, setPasso] = useState(0);
   const [sucesso, setSucesso] = useState(false);
+  const [chatMsgs, setChatMsgs] = useState<ChatMensagem[]>([]); // sobrevive ao loop de ajuste
   const [concluindo, iniciarConclusao] = useTransition();
 
   const avancar = () => setPasso((p) => Math.min(p + 1, PASSOS.length - 1));
@@ -109,8 +120,18 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
               Pronto! Converse com a Julia como se fosse um aluno. Ela responde na hora — quem
               executa é você e sua equipe.
             </p>
-            <div className="h-[58vh]">
-              <JuliaChat />
+            <div className="h-[52vh]">
+              <JuliaChat messages={chatMsgs} onMessagesChange={setChatMsgs} />
+            </div>
+            <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2.5">
+              <p className="text-[12.5px] text-ink-2">Não ficou do seu jeito?</p>
+              <button
+                type="button"
+                onClick={() => setPasso(3)}
+                className="flex-none text-[13px] font-semibold text-brand hover:underline"
+              >
+                Ajustar como a Julia fala →
+              </button>
             </div>
           </div>
         )}
@@ -166,8 +187,10 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
 // ── Passo 1 · Academia (+ WhatsApp oficial) ──────────────────────────────────
 function PassoAcademia({ inicial }: { inicial: SetupData }) {
   const router = useRouter();
+  const horarioIni = parseHorario(inicial.config.academia_horarios);
   const [nome, setNome] = useState(inicial.config.academia_nome ?? "");
-  const [horarios, setHorarios] = useState(inicial.config.academia_horarios ?? "");
+  const [abre, setAbre] = useState(horarioIni.abre);
+  const [fecha, setFecha] = useState(horarioIni.fecha);
   const [whatsapp, setWhatsapp] = useState(inicial.config.numero_elite ?? "");
   const [pending, start] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
@@ -176,6 +199,7 @@ function PassoAcademia({ inicial }: { inicial: SetupData }) {
   function salvar() {
     setErro(null);
     start(async () => {
+      const horarios = abre && fecha ? `${abre} às ${fecha}` : "";
       const r = await salvarAcademia({ nome, horarios, whatsapp });
       if (r.ok) {
         setSalvo(true);
@@ -194,7 +218,11 @@ function PassoAcademia({ inicial }: { inicial: SetupData }) {
         <input value={whatsapp} onChange={(e) => { setWhatsapp(e.target.value); setSalvo(false); }} inputMode="tel" placeholder="Ex.: (11) 90000-0000" className={INPUT} />
       </Campo>
       <Campo label="Horário de funcionamento">
-        <textarea value={horarios} onChange={(e) => { setHorarios(e.target.value); setSalvo(false); }} rows={2} placeholder="Ex.: Seg a Sex 6h–22h · Sáb 8h–13h" className={`${INPUT} resize-none`} />
+        <div className="flex items-center gap-2">
+          <input type="time" value={abre} onChange={(e) => { setAbre(e.target.value); setSalvo(false); }} aria-label="Abre" className={TIME_IN} />
+          <span className="text-sm text-muted">às</span>
+          <input type="time" value={fecha} onChange={(e) => { setFecha(e.target.value); setSalvo(false); }} aria-label="Fecha" className={TIME_IN} />
+        </div>
       </Campo>
       {erro && <p className="text-xs text-risk">{erro}</p>}
       <button type="button" onClick={salvar} disabled={pending} className="self-start rounded-xl bg-ink px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60">

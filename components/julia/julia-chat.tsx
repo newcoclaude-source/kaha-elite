@@ -6,12 +6,29 @@
 
 import { useEffect, useRef, useState } from "react";
 
-type Msg = { role: "user" | "assistant"; content: string };
+export type ChatMensagem = { role: "user" | "assistant"; content: string };
 
 const SUGESTOES = ["Quanto custa o Elite?", "Abrem sábado?", "Quero agendar avaliação"];
 
-export function JuliaChat() {
-  const [msgs, setMsgs] = useState<Msg[]>([]);
+// Controlável: se `messages`/`onMessagesChange` vierem por prop, o estado do chat
+// vive fora (ex.: no wizard, pra sobreviver à ida ao passo de ajuste e volta).
+// Sem props, mantém estado interno (uso solto em /julia).
+export function JuliaChat({
+  messages,
+  onMessagesChange,
+}: {
+  messages?: ChatMensagem[];
+  onMessagesChange?: (m: ChatMensagem[]) => void;
+} = {}) {
+  const [msgsInternos, setMsgsInternos] = useState<ChatMensagem[]>([]);
+  const msgs = messages ?? msgsInternos;
+  const setMsgs = (
+    next: ChatMensagem[] | ((prev: ChatMensagem[]) => ChatMensagem[]),
+  ) => {
+    const valor = typeof next === "function" ? next(msgs) : next;
+    if (onMessagesChange) onMessagesChange(valor);
+    else setMsgsInternos(valor);
+  };
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -25,7 +42,7 @@ export function JuliaChat() {
     const t = texto.trim();
     if (!t || loading) return;
     setErro(null);
-    const proximo: Msg[] = [...msgs, { role: "user", content: t }];
+    const proximo: ChatMensagem[] = [...msgs, { role: "user", content: t }];
     setMsgs(proximo);
     setInput("");
     setLoading(true);
