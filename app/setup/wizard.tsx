@@ -384,11 +384,11 @@ function PassoConectarWhatsapp({ inicial }: { inicial: SetupData }) {
     { label: "Conexão concluída", emBreve: true },
   ];
   const prepare = [
-    "Um número de telefone dedicado à academia (de preferência, não o seu WhatsApp pessoal).",
-    "Acesso a esse número para receber o código de confirmação por SMS ou ligação.",
-    "Nome e logo da academia para o perfil.",
-    "Horário de atendimento definido.",
-    "Uma conta comercial no Facebook/Meta — ou disposição para criar junto com a nossa equipe.",
+    "WhatsApp Business App atualizado (v2.24.17 ou mais recente) num celular com câmera.",
+    "Login do Facebook de quem administra o negócio.",
+    "Portfólio empresarial da Meta (pode criar na hora — a escolha é definitiva).",
+    "Página do Facebook vinculada ao WhatsApp Business.",
+    "Durante a conexão: celular com o app aberto e internet estável.",
   ];
 
   return (
