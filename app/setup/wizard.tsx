@@ -10,6 +10,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PerfilEquipe, SetupData } from "@/lib/kaha/onboarding";
 import { JuliaChat, type ChatMensagem } from "@/components/julia/julia-chat";
+import { CALIBRACAO_ATIVA } from "@/lib/julia/flags";
+import { corProfessor } from "@/lib/kaha/cores";
+import { iniciais } from "@/lib/kaha/ui";
 import { ImportarAlunos } from "./import-alunos";
 import { PassoJulia } from "./passo-julia";
 import {
@@ -50,7 +53,11 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
   const router = useRouter();
   const [passo, setPasso] = useState(0);
   const [sucesso, setSucesso] = useState(false);
-  const [chatMsgs, setChatMsgs] = useState<ChatMensagem[]>([]); // sobrevive ao loop de ajuste
+  const [chatMsgs, setChatMsgs] = useState<ChatMensagem[]>([]); // teste-como-aluno
+  const [chatMsgsCalib, setChatMsgsCalib] = useState<ChatMensagem[]>([]); // entrevista
+  const [modoJulia, setModoJulia] = useState<"calibracao" | "aluno">(
+    CALIBRACAO_ATIVA ? "calibracao" : "aluno",
+  );
   const [concluindo, iniciarConclusao] = useTransition();
 
   const avancar = () => setPasso((p) => Math.min(p + 1, PASSOS.length - 1));
@@ -116,23 +123,48 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
         {passo === 4 && <PassoProfessoresEquipe inicial={inicial} />}
         {passo === 5 && (
           <div className="flex flex-col gap-3">
+            {CALIBRACAO_ATIVA && (
+              <div className="flex gap-1 rounded-lg bg-line-2 p-1 text-[12px] font-semibold">
+                <button
+                  type="button"
+                  onClick={() => setModoJulia("calibracao")}
+                  className={`flex-1 rounded-md py-1.5 ${modoJulia === "calibracao" ? "bg-card text-ink shadow-sm" : "text-muted"}`}
+                >
+                  Configurar conversando
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setModoJulia("aluno")}
+                  className={`flex-1 rounded-md py-1.5 ${modoJulia === "aluno" ? "bg-card text-ink shadow-sm" : "text-muted"}`}
+                >
+                  Testar como aluno
+                </button>
+              </div>
+            )}
             <p className="text-[13px] text-muted">
-              Pronto! Converse com a Julia como se fosse um aluno. Ela responde na hora — quem
-              executa é você e sua equipe.
+              {CALIBRACAO_ATIVA && modoJulia === "calibracao"
+                ? "A Julia te pergunta como você quer atender — responda no seu jeito e ela vai configurando. No fim, mostra como ficam as mensagens."
+                : "Converse com a Julia como se fosse um aluno. Ela responde na hora — quem executa é você e sua equipe."}
             </p>
             <div className="h-[52vh]">
-              <JuliaChat messages={chatMsgs} onMessagesChange={setChatMsgs} />
+              {CALIBRACAO_ATIVA && modoJulia === "calibracao" ? (
+                <JuliaChat mode="calibracao" messages={chatMsgsCalib} onMessagesChange={setChatMsgsCalib} />
+              ) : (
+                <JuliaChat messages={chatMsgs} onMessagesChange={setChatMsgs} />
+              )}
             </div>
-            <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2.5">
-              <p className="text-[12.5px] text-ink-2">Não ficou do seu jeito?</p>
-              <button
-                type="button"
-                onClick={() => setPasso(3)}
-                className="flex-none text-[13px] font-semibold text-brand hover:underline"
-              >
-                Ajustar como a Julia fala →
-              </button>
-            </div>
+            {(!CALIBRACAO_ATIVA || modoJulia === "aluno") && (
+              <div className="flex items-center justify-between gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2.5">
+                <p className="text-[12.5px] text-ink-2">Não ficou do seu jeito?</p>
+                <button
+                  type="button"
+                  onClick={() => setPasso(3)}
+                  className="flex-none text-[13px] font-semibold text-brand hover:underline"
+                >
+                  Ajustar como a Julia fala →
+                </button>
+              </div>
+            )}
           </div>
         )}
         {passo === 6 && <PassoConectarWhatsapp inicial={inicial} />}
@@ -282,18 +314,22 @@ function PassoPlanos({ inicial }: { inicial: SetupData }) {
 }
 
 // ── Passo 4 · Professores e equipe ───────────────────────────────────────────
+const ESPECIALIDADES = ["Musculação", "Funcional", "Emagrecimento", "Performance", "Condicionamento"];
+
 function PassoProfessoresEquipe({ inicial }: { inicial: SetupData }) {
   const router = useRouter();
   const [nome, setNome] = useState("");
   const [esp, setEsp] = useState("");
+  const [espOutra, setEspOutra] = useState(false);
   const [pending, start] = useTransition();
   const [erro, setErro] = useState<string | null>(null);
 
   function add() {
     setErro(null);
+    if (!nome.trim()) { setErro("Dê um nome ao professor."); return; }
     start(async () => {
       const r = await criarProfessor({ nome, especialidade: esp });
-      if (r.ok) { setNome(""); setEsp(""); router.refresh(); }
+      if (r.ok) { setNome(""); setEsp(""); setEspOutra(false); router.refresh(); }
       else setErro(r.erro ?? "Não foi possível adicionar.");
     });
   }
@@ -303,22 +339,62 @@ function PassoProfessoresEquipe({ inicial }: { inicial: SetupData }) {
     <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-3">
         <p className="text-[13px] text-muted">Quem dá os treinos. A grade de horários você monta depois, em Professores.</p>
-        {inicial.professores.map((p) => (
-          <div key={p.id} className="flex items-center gap-3 rounded-xl border border-line bg-card px-4 py-3">
-            <div className="min-w-0 flex-1">
-              <div className="truncate text-sm font-semibold">{p.nome}</div>
-              {p.especialidade && <div className="truncate text-[11.5px] text-muted">{p.especialidade}</div>}
+        {inicial.professores.map((p) => {
+          const { cor, soft } = corProfessor(p.id);
+          return (
+            <div key={p.id} className="flex items-center gap-3 rounded-xl border border-line bg-card px-4 py-3">
+              <span
+                className="flex h-9 w-9 flex-none items-center justify-center rounded-xl text-[11px] font-bold"
+                style={{ color: cor, backgroundColor: soft, border: `1px solid ${cor}` }}
+              >
+                {iniciais(p.nome)}
+              </span>
+              <div className="min-w-0 flex-1">
+                <div className="truncate text-sm font-semibold">{p.nome}</div>
+                {p.especialidade && <div className="truncate text-[11.5px] text-muted">{p.especialidade}</div>}
+              </div>
+              <button type="button" onClick={() => remover(p.id)} disabled={pending} className="text-muted-2 hover:text-risk" aria-label="Remover professor">✕</button>
             </div>
-            <button type="button" onClick={() => remover(p.id)} disabled={pending} className="text-muted-2 hover:text-risk" aria-label="Remover professor">✕</button>
+          );
+        })}
+        <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-2 p-3">
+          <input
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+            placeholder="Nome do professor"
+            className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-muted-2"
+          />
+          <div className="flex flex-wrap gap-1.5">
+            {ESPECIALIDADES.map((x) => (
+              <button
+                key={x}
+                type="button"
+                onClick={() => { setEsp(x); setEspOutra(false); }}
+                className={`rounded-full border px-2.5 py-1 text-[12px] font-semibold ${esp === x && !espOutra ? "border-ink bg-ink text-white" : "border-line text-ink-2 hover:border-muted-2"}`}
+              >
+                {x}
+              </button>
+            ))}
+            <button
+              type="button"
+              onClick={() => { setEspOutra(true); setEsp(""); }}
+              className={`rounded-full border px-2.5 py-1 text-[12px] font-semibold ${espOutra ? "border-ink bg-ink text-white" : "border-line text-ink-2 hover:border-muted-2"}`}
+            >
+              + outra
+            </button>
           </div>
-        ))}
-        <div className="rounded-xl border border-line bg-surface-2 p-3">
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <input value={nome} onChange={(e) => setNome(e.target.value)} placeholder="Nome do professor" className="min-w-0 flex-1 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-muted-2" />
-            <input value={esp} onChange={(e) => setEsp(e.target.value)} placeholder="Especialidade (opcional)" className="min-w-0 flex-1 rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-muted-2" />
-            <button type="button" onClick={add} disabled={pending} className="rounded-lg bg-brand px-3 py-2 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-60">Adicionar</button>
-          </div>
-          {erro && <p className="mt-1 text-xs text-risk">{erro}</p>}
+          {espOutra && (
+            <input
+              value={esp}
+              onChange={(e) => setEsp(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
+              placeholder="Qual especialidade?"
+              className="w-full rounded-lg border border-line px-3 py-2 text-sm outline-none focus:border-muted-2"
+            />
+          )}
+          <button type="button" onClick={add} disabled={pending} className="self-start rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-60">Adicionar</button>
+          {erro && <p className="text-xs text-risk">{erro}</p>}
         </div>
       </div>
 

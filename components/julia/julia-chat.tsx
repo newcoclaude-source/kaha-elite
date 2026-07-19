@@ -16,9 +16,11 @@ const SUGESTOES = ["Quanto custa o Elite?", "Abrem sábado?", "Quero agendar ava
 export function JuliaChat({
   messages,
   onMessagesChange,
+  mode = "aluno",
 }: {
   messages?: ChatMensagem[];
   onMessagesChange?: (m: ChatMensagem[]) => void;
+  mode?: "aluno" | "calibracao";
 } = {}) {
   const [msgsInternos, setMsgsInternos] = useState<ChatMensagem[]>([]);
   const msgs = messages ?? msgsInternos;
@@ -50,7 +52,7 @@ export function JuliaChat({
       const r = await fetch("/api/julia", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ messages: proximo }),
+        body: JSON.stringify({ messages: proximo, mode }),
       });
       const data = await r.json();
       if (!r.ok || data.erro) {
@@ -78,18 +80,33 @@ export function JuliaChat({
           <p className="text-sm font-semibold text-ink">Julia</p>
           <p className="flex items-center gap-1.5 text-[11px] text-muted">
             <span className="h-1.5 w-1.5 rounded-full bg-ok" />
-            concierge do Elite
+            {mode === "calibracao" ? "configurando com você" : "concierge do Elite"}
           </p>
         </div>
       </div>
 
       {/* Conversa */}
       <div className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto bg-[#FAFAFB] p-4">
-        {vazio && (
-          <div className="m-auto max-w-[85%] text-center">
+        {vazio && mode === "calibracao" && (
+          <div className="m-auto flex max-w-[88%] flex-col items-center gap-3 text-center">
             <p className="text-[13px] font-medium text-ink">
-              Oi! Aqui é a Julia. 👋
+              Vamos deixar o atendimento com a sua cara. 💬
             </p>
+            <p className="text-[12px] leading-relaxed text-muted">
+              Eu te faço algumas perguntas rápidas e já vou configurando enquanto a gente conversa.
+            </p>
+            <button
+              type="button"
+              onClick={() => enviar("Bora configurar meu atendimento!")}
+              className="rounded-xl bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover"
+            >
+              Começar
+            </button>
+          </div>
+        )}
+        {vazio && mode !== "calibracao" && (
+          <div className="m-auto max-w-[85%] text-center">
+            <p className="text-[13px] font-medium text-ink">Oi! Aqui é a Julia. 👋</p>
             <p className="mt-1 text-[12px] leading-relaxed text-muted">
               Pode perguntar o que quiser sobre o Elite — ou toque numa sugestão abaixo.
             </p>
@@ -133,8 +150,8 @@ export function JuliaChat({
         <div ref={fimRef} />
       </div>
 
-      {/* Sugestões (só no início) */}
-      {vazio && (
+      {/* Sugestões (só no início, e só no modo aluno) */}
+      {vazio && mode !== "calibracao" && (
         <div className="flex flex-none flex-wrap gap-2 border-t border-line px-4 pt-3">
           {SUGESTOES.map((s) => (
             <button
@@ -167,7 +184,7 @@ export function JuliaChat({
             }
           }}
           rows={1}
-          placeholder="Escreva uma mensagem…"
+          placeholder={mode === "calibracao" ? "Responda à Julia…" : "Escreva uma mensagem…"}
           className="max-h-28 min-h-[42px] flex-1 resize-none rounded-xl border border-line px-3 py-2.5 text-sm outline-none focus:border-muted-2"
         />
         <button
