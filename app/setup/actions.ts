@@ -121,6 +121,20 @@ export async function importarAlunos(
   return { ok: true, inseridos: data?.length ?? 0 };
 }
 
+// Passo "Conectar WhatsApp" · triagem (sim/não). Não conecta nada — só registra.
+export async function salvarConexaoWhatsapp(dados: {
+  numero_ja_conectado: boolean;
+}): Promise<Res> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from("kaha_config")
+    .update({ numero_ja_conectado: dados.numero_ja_conectado })
+    .eq("id", true);
+  if (error) return { ok: false, erro: error.message };
+  revalidatePath("/setup");
+  return { ok: true };
+}
+
 export async function concluirOnboarding(): Promise<Res> {
   const supabase = createClient();
   const { error } = await supabase

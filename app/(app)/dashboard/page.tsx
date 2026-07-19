@@ -1,5 +1,7 @@
 import { headers } from "next/headers";
 import { carregarDashboard } from "@/lib/kaha/dashboard";
+import { carregarPrimeirosPassos } from "@/lib/kaha/onboarding";
+import { PrimeirosPassos } from "@/components/onboarding/primeiros-passos";
 import { DashboardD8 } from "./dashboard-d8";
 
 export const dynamic = "force-dynamic";
@@ -20,6 +22,7 @@ export default async function DashboardPage() {
   const host = h.get("host") ?? "localhost:3000";
   const proto = h.get("x-forwarded-proto") ?? "http";
   const data = await carregarDashboard(`${proto}://${host}`);
+  const primeirosPassos = await carregarPrimeirosPassos();
 
   const hoje = hojeSP();
   const d = new Date(hoje + "T12:00:00Z");
@@ -32,11 +35,14 @@ export default async function DashboardPage() {
   });
 
   return (
-    <DashboardD8
-      data={data}
-      hojeDia={hojeDia}
-      hojeLabel={hojeLabel}
-      diasParaFechar={diasParaFechar}
-    />
+    <>
+      <DashboardD8
+        data={data}
+        hojeDia={hojeDia}
+        hojeLabel={hojeLabel}
+        diasParaFechar={diasParaFechar}
+      />
+      <PrimeirosPassos passos={primeirosPassos.passos} pct={primeirosPassos.pct} />
+    </>
   );
 }

@@ -6,6 +6,7 @@
 // Sem ToastProvider aqui → feedback de erro inline.
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { PerfilEquipe, SetupData } from "@/lib/kaha/onboarding";
 import { JuliaChat } from "@/components/julia/julia-chat";
@@ -20,6 +21,7 @@ import {
   removerProfessor,
   removerUsuario,
   salvarAcademia,
+  salvarConexaoWhatsapp,
 } from "./actions";
 
 const PASSOS = [
@@ -29,6 +31,7 @@ const PASSOS = [
   { label: "Conhecimento da Julia", obrig: false },
   { label: "Professores e equipe", obrig: false },
   { label: "Experimente a Julia", obrig: false },
+  { label: "Conectar WhatsApp", obrig: false },
 ] as const;
 
 const INPUT = "w-full rounded-[10px] border border-line px-3 py-2.5 text-sm outline-none focus:border-muted-2";
@@ -36,20 +39,25 @@ const INPUT = "w-full rounded-[10px] border border-line px-3 py-2.5 text-sm outl
 export function Wizard({ inicial, preview }: { inicial: SetupData; preview: boolean }) {
   const router = useRouter();
   const [passo, setPasso] = useState(0);
+  const [sucesso, setSucesso] = useState(false);
   const [concluindo, iniciarConclusao] = useTransition();
 
   const avancar = () => setPasso((p) => Math.min(p + 1, PASSOS.length - 1));
   const voltar = () => setPasso((p) => Math.max(p - 1, 0));
-  function concluir() {
+  function finalizar() {
     iniciarConclusao(async () => {
+      // Sem router.refresh() aqui: com onboarding_concluido=true o /setup
+      // redirecionaria para /agenda e pularia a tela de sucesso. O resumo usa
+      // o `inicial` já atualizado pelos refreshes de cada passo.
       await concluirOnboarding();
-      router.replace("/agenda");
-      router.refresh();
+      setSucesso(true);
     });
   }
 
   const atual = PASSOS[passo];
   const ultimo = passo === PASSOS.length - 1;
+
+  if (sucesso) return <TelaSucesso inicial={inicial} />;
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col px-5 py-8">
@@ -106,6 +114,7 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
             </div>
           </div>
         )}
+        {passo === 6 && <PassoConectarWhatsapp inicial={inicial} />}
       </div>
 
       <div className="mt-6 flex items-center gap-3 border-t border-line pt-4">
@@ -133,11 +142,11 @@ export function Wizard({ inicial, preview }: { inicial: SetupData; preview: bool
           {ultimo ? (
             <button
               type="button"
-              onClick={concluir}
+              onClick={finalizar}
               disabled={concluindo}
               className="rounded-xl bg-brand px-5 py-2.5 text-sm font-semibold text-white hover:bg-brand-hover disabled:opacity-60"
             >
-              {concluindo ? "Concluindo…" : "Concluir configuração"}
+              {concluindo ? "Finalizando…" : "Finalizar configuração"}
             </button>
           ) : (
             <button
@@ -348,6 +357,177 @@ function Equipe({ inicial }: { inicial: SetupData }) {
         {erro && <p className="mt-1 text-xs text-risk">{erro}</p>}
       </div>
     </div>
+  );
+}
+
+// ── Passo 6 · Conectar WhatsApp (informativo — a ativação é feita com a equipe)
+function PassoConectarWhatsapp({ inicial }: { inicial: SetupData }) {
+  const router = useRouter();
+  const [conectado, setConectado] = useState<boolean | null>(
+    inicial.config.numero_ja_conectado,
+  );
+  const [pending, start] = useTransition();
+  const numeroInformado = !!inicial.config.numero_elite?.trim();
+
+  function escolher(v: boolean) {
+    setConectado(v);
+    start(async () => {
+      await salvarConexaoWhatsapp({ numero_ja_conectado: v });
+      router.refresh();
+    });
+  }
+
+  const status = [
+    { label: "Número informado", feito: numeroInformado },
+    { label: "Conta Business preparada", emBreve: true },
+    { label: "Verificação Meta", emBreve: true },
+    { label: "Conexão concluída", emBreve: true },
+  ];
+  const prepare = [
+    "Um número de telefone dedicado à academia (de preferência, não o seu WhatsApp pessoal).",
+    "Acesso a esse número para receber o código de confirmação por SMS ou ligação.",
+    "Nome e logo da academia para o perfil.",
+    "Horário de atendimento definido.",
+    "Uma conta comercial no Facebook/Meta — ou disposição para criar junto com a nossa equipe.",
+  ];
+
+  return (
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-1.5">
+        <h3 className="text-[15px] font-bold">Conecte seu WhatsApp</h3>
+        <p className="text-[13px] leading-relaxed text-muted">
+          Este será o número oficial usado pela Julia, a concierge do Elite, para
+          conversar com seus alunos.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-xl border border-line bg-card p-3">
+        {status.map((s) => (
+          <div key={s.label} className="flex items-center gap-2.5 text-[13px]">
+            <StatusDot feito={!!s.feito} />
+            <span className={s.feito ? "text-ink" : "text-ink-2"}>{s.label}</span>
+            {s.emBreve && (
+              <span className="ml-auto rounded-full bg-line-2 px-2 py-0.5 text-[10px] font-semibold text-muted">
+                em breve
+              </span>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <p className="text-[12px] font-semibold text-ink-2">Prepare-se — o que ter em mãos:</p>
+        <ul className="flex flex-col gap-2">
+          {prepare.map((p, i) => (
+            <li key={i} className="flex items-start gap-2 text-[12.5px] leading-relaxed text-ink-2">
+              <span className="mt-[3px] h-4 w-4 flex-none rounded-full border border-line" />
+              {p}
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="flex flex-col gap-2 rounded-xl border border-line bg-surface-2 p-3">
+        <p className="text-[12.5px] font-semibold text-ink">
+          Seu número já foi usado em alguma outra ferramenta de mensagens antes?
+        </p>
+        <div className="flex gap-2">
+          {[
+            { v: true, label: "Sim" },
+            { v: false, label: "Não" },
+          ].map((o) => (
+            <button
+              key={o.label}
+              type="button"
+              onClick={() => escolher(o.v)}
+              disabled={pending}
+              className={`rounded-full border px-4 py-1.5 text-[12.5px] font-semibold ${
+                conectado === o.v
+                  ? "border-ink bg-ink text-white"
+                  : "border-line text-ink-2 hover:border-muted-2"
+              }`}
+            >
+              {o.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-[11px] text-muted-2">
+          Isso ajuda nossa equipe a preparar a ativação com segurança.
+        </p>
+      </div>
+
+      <p className="rounded-xl bg-blue-soft px-3 py-2.5 text-[12.5px] leading-relaxed text-blue">
+        Nesta fase inicial, nossa equipe faz a ativação junto com você.
+      </p>
+    </div>
+  );
+}
+
+function StatusDot({ feito }: { feito: boolean }) {
+  return feito ? (
+    <span className="flex h-4 w-4 flex-none items-center justify-center rounded-full bg-ok text-[9px] font-bold text-white">
+      ✓
+    </span>
+  ) : (
+    <span className="h-4 w-4 flex-none rounded-full border border-line" />
+  );
+}
+
+// ── Tela de sucesso (pós-wizard) ─────────────────────────────────────────────
+function TelaSucesso({ inicial }: { inicial: SetupData }) {
+  const c = inicial.config;
+  const juliaPersonalizada =
+    inicial.faq.length > 0 || !!c.saudacao?.trim() || !!c.resposta_valores?.trim();
+  const linhas = [
+    inicial.alunosCount > 0 &&
+      `${inicial.alunosCount} ${inicial.alunosCount === 1 ? "aluno importado" : "alunos importados"}`,
+    inicial.professores.length > 0 &&
+      `${inicial.professores.length} ${inicial.professores.length === 1 ? "professor" : "professores"}`,
+    juliaPersonalizada && "Julia personalizada",
+    !!c.numero_elite?.trim() && "WhatsApp cadastrado",
+    inicial.equipe.length > 0 && "Equipe cadastrada",
+  ].filter(Boolean) as string[];
+
+  return (
+    <main className="mx-auto flex min-h-screen w-full max-w-lg flex-col items-center justify-center px-5 py-10 text-center">
+      <div className="mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-ok-soft text-3xl">
+        🎉
+      </div>
+      <h1 className="font-display text-2xl font-black italic">Tudo pronto.</h1>
+      <p className="mt-2 text-[14px] leading-relaxed text-muted">
+        Sua academia já pode começar a usar o Kaha Elite.
+      </p>
+
+      {linhas.length > 0 && (
+        <div className="mt-6 w-full rounded-2xl border border-line bg-card p-4">
+          <ul className="flex flex-col gap-2.5 text-left">
+            {linhas.map((l) => (
+              <li key={l} className="flex items-center gap-2.5 text-[13px] text-ink">
+                <span className="flex h-5 w-5 flex-none items-center justify-center rounded-full bg-ok text-[10px] font-bold text-white">
+                  ✓
+                </span>
+                {l}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <div className="mt-7 flex w-full flex-col gap-2.5 sm:flex-row">
+        <Link
+          href="/julia"
+          className="flex-1 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-white hover:bg-brand-hover"
+        >
+          Testar a Julia
+        </Link>
+        <Link
+          href="/dashboard"
+          className="flex-1 rounded-xl border border-line px-5 py-3 text-sm font-semibold text-ink-2 hover:border-muted-2"
+        >
+          Entrar na plataforma
+        </Link>
+      </div>
+    </main>
   );
 }
 

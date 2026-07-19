@@ -27,6 +27,7 @@ export type SetupConfig = {
   prazo_cancelar: string | null;
   dias_resgate: number | null;
   hora_confirmacao: string | null;
+  numero_ja_conectado: boolean | null;
   onboarding_concluido: boolean;
 };
 
@@ -51,6 +52,7 @@ const CONFIG_VAZIA: SetupConfig = {
   prazo_cancelar: null,
   dias_resgate: null,
   hora_confirmacao: null,
+  numero_ja_conectado: null,
   onboarding_concluido: false,
 };
 
@@ -69,7 +71,7 @@ export async function carregarSetup(): Promise<SetupData> {
     supabase
       .from("kaha_config")
       .select(
-        "academia_nome, academia_horarios, numero_elite, tom, saudacao, janela_inicio, janela_fim, resposta_valores, prazo_cancelar, dias_resgate, hora_confirmacao, onboarding_concluido",
+        "academia_nome, academia_horarios, numero_elite, tom, saudacao, janela_inicio, janela_fim, resposta_valores, prazo_cancelar, dias_resgate, hora_confirmacao, numero_ja_conectado, onboarding_concluido",
       )
       .maybeSingle(),
     supabase
@@ -134,4 +136,41 @@ export async function contarPendencias(): Promise<PendenciasOnboarding> {
     total: passos.length,
     passos,
   };
+}
+
+// Checklist "Primeiros passos" do Dashboard. Estados derivados do banco.
+// "Conectar WhatsApp" fica em breve (a ativação é feita com a equipe nesta fase).
+// "Testar a Julia" usa as pendências como sinal (a conversa não é persistida).
+export type PrimeiroPasso = {
+  chave: string;
+  label: string;
+  feito: boolean;
+  emBreve?: boolean;
+};
+
+export async function carregarPrimeirosPassos(): Promise<{
+  passos: PrimeiroPasso[];
+  feitos: number;
+  total: number;
+  pct: number;
+}> {
+  const supabase = createClient();
+  const [cfg, alunos, faq, pend, msg] = await Promise.all([
+    supabase.from("kaha_config").select("academia_nome").maybeSingle(),
+    supabase.from("kaha_alunos").select("id", { count: "exact", head: true }).eq("ativo", true),
+    supabase.from("kaha_faq").select("id", { count: "exact", head: true }),
+    supabase.from("kaha_julia_pendencias").select("id", { count: "exact", head: true }),
+    supabase.from("kaha_mensagens").select("id", { count: "exact", head: true }),
+  ]);
+  const passos: PrimeiroPasso[] = [
+    { chave: "academia", label: "Configurar academia", feito: !!cfg.data?.academia_nome?.trim() },
+    { chave: "alunos", label: "Importar alunos", feito: (alunos.count ?? 0) > 0 },
+    { chave: "julia", label: "Ensinar a Julia", feito: (faq.count ?? 0) > 0 },
+    { chave: "whatsapp", label: "Conectar WhatsApp", feito: false, emBreve: true },
+    { chave: "testar", label: "Testar a Julia", feito: (pend.count ?? 0) > 0 },
+    { chave: "mensagem", label: "Enviar primeira mensagem", feito: (msg.count ?? 0) > 0 },
+  ];
+  const feitos = passos.filter((p) => p.feito).length;
+  const total = passos.length;
+  return { passos, feitos, total, pct: Math.round((feitos / total) * 100) };
 }
